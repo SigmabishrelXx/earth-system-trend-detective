@@ -25,7 +25,7 @@ decade (significant), with significant warming across 62% of the country, and su
 ## Link to project / demo
 
 - App: ⟨Streamlit Community Cloud link⟩
-- Code: ⟨GitHub repository link⟩
+- Code: https://github.com/SigmabishrelXx/earth-system-trend-detective
 - Demo: ⟨30-second video or slides link⟩
 
 ## Detailed project description
