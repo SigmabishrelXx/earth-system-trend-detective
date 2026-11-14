@@ -174,6 +174,10 @@ No Space Agency Partner data was used. Other data, code, tools and references (s
 | Streamlit (app framework) | https://streamlit.io |
 | Plotly (interactive charts) | https://plotly.com/python/ |
 | SciPy (statistics) | https://scipy.org |
+| pandas (data tables) | https://pandas.pydata.org |
+| NumPy (numerical computing) | https://numpy.org |
+| Google Fonts: Manrope, Inter and Archivo (website and slide fonts) | https://fonts.google.com |
+| Warming stripes visual style, created by climate scientist Ed Hawkins | https://showyourstripes.info |
 | Claude Code by Anthropic: AI coding assistant (see Use of SI) | https://www.anthropic.com/claude-code |
 | Gelaro et al. (2017), MERRA-2, Journal of Climate | https://doi.org/10.1175/JCLI-D-16-0758.1 |
 | Mann (1945), Nonparametric tests against trend, Econometrica | https://doi.org/10.2307/1907187 |
