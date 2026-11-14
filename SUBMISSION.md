@@ -36,8 +36,9 @@ https://github.com/SigmabishrelXx/earth-system-trend-detective/blob/main/demo/Ea
 
 https://sigmabishrelxx.github.io/earth-system-trend-detective/
 
-(Project website with live, interactive charts from the app's NASA data, who it is for, how it works, findings and
-example missions. It links to the live app and the code.)
+(Project website with a live mini version of the app at the top (choose a place, variable and season and get the
+same numbers and verdict as the app), interactive charts from the app's NASA data, who it is for, how it works,
+findings and example missions. It links to the live app and the code.)
 
 Live app: ⟨live app link⟩
 Code: https://github.com/SigmabishrelXx/earth-system-trend-detective

@@ -128,9 +128,14 @@ async def main():
 
             # 1. Full app view (viewport screenshot) - mission 1, Mongolia country average
             await p.cmd("Emulation.setDeviceMetricsOverride", width=1440, height=900, deviceScaleFactor=2, mobile=False)
+            await p.cmd("Emulation.setDeviceMetricsOverride", width=1440, height=1500, deviceScaleFactor=2, mobile=False)
             await p.goto(f"{BASE}/?mission=1")
             await p.guess("Going up")
-            await p.shot("01_app_mission1")
+            # end the picture cleanly just below the row of number cards (no half-cut text)
+            bottom = await p.js("(()=>{const m=[...document.querySelectorAll('[data-testid=stMetric]')].find(e=>e.offsetParent!==null);"
+                                " return m ? m.getBoundingClientRect().bottom : 900;})()")
+            await p.shot("01_app_mission1", {"x": 0, "y": 0, "width": 1440, "height": bottom + 16}, pad=0)
+            await p.cmd("Emulation.setDeviceMetricsOverride", width=1440, height=900, deviceScaleFactor=2, mobile=False)
 
             # Tall viewport so whole sections fit without scrolling
             await p.cmd("Emulation.setDeviceMetricsOverride", width=1440, height=2600, deviceScaleFactor=2, mobile=False)

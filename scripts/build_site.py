@@ -30,6 +30,51 @@ from build_web_slides import MAP_VARS, REPO, PDF_URL, build_data  # noqa: E402
 from trend_detective import catalog as C  # noqa: E402
 from trend_detective.analysis import format_p  # noqa: E402
 from trend_detective.figures import site_style  # noqa: E402
+from scipy import stats as sstats  # noqa: E402
+from trend_detective.analysis import analyze  # noqa: E402
+from trend_detective.data import country_average, load_grid, load_point, seasonal_series, source_consistent  # noqa: E402
+
+SEASON_WORD = {"Whole year": "", "Winter (Dec-Feb)": "winter", "Spring (Mar-May)": "spring",
+               "Summer (Jun-Aug)": "summer", "Autumn (Sep-Nov)": "autumn"}
+
+
+def _pack(df, trimmed: bool) -> dict:
+    """Everything the in-browser demo needs for one series, computed with the app's own statistics code."""
+    r = analyze(df)
+    years = [int(y) for y in df["Year"]]
+    out = {"v": [round(float(x), 4) for x in df["Value"]], "s": r.slope, "b": r.intercept, "rs": r.resid_std,
+           "tc": float(sstats.t.ppf(0.975, r.n - 2)), "pd": r.per_decade, "tot": r.total_change, "mk": r.mk.p,
+           "tp": r.p_linear, "r2": r.r2, "vd": {"significant": "s", "mixed": "m", "not significant": "n"}[r.verdict],
+           "yn": r.years_needed, "tr": int(trimmed), "lag": int(r.lag1 > 0.3)}
+    if years == list(range(years[0], years[0] + len(years))):
+        out["y0"] = years[0]
+    else:
+        out["y"] = years
+    for k in ("s", "b", "rs", "tc", "pd", "tot", "r2"):
+        out[k] = round(out[k], 6)
+    out["mk"], out["tp"] = float(f"{out['mk']:.4g}"), float(f"{out['tp']:.4g}")
+    return out
+
+
+def build_demo() -> dict:
+    grid = load_grid()
+    locs = [{"id": "MNG", "name": "All of Mongolia (average)", "short": "Mongolia (country average)", "region": 1}]
+    locs += [{"id": C.slugify(n), "name": n, "short": n, "region": 0} for n in C.LOCATIONS]
+    series = {}
+    for var in C.MAP_VARIABLES:
+        df = country_average(grid, var)
+        df, trimmed = source_consistent(var, df)
+        series[f"MNG|{var}|Whole year"] = _pack(df, trimmed)
+    for name, (lat, lon, _) in C.LOCATIONS.items():
+        monthly, _ = load_point(lat, lon)
+        for var in C.VARIABLES:
+            for season in C.SEASONS:
+                df, trimmed = source_consistent(var, seasonal_series(monthly, var, season))
+                if len(df) >= 5 and df["Value"].std() > 0:
+                    series[f"{C.slugify(name)}|{var}|{season}"] = _pack(df, trimmed)
+    vars_ = [{"id": k, "label": m["label"], "unit": m["unit"], "theme": m["theme"], "def": m["definition"]} for k, m in C.VARIABLES.items()]
+    return {"locs": locs, "vars": vars_, "seasons": list(C.SEASONS), "word": SEASON_WORD, "series": series}
+
 
 ROOT = Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
@@ -154,6 +199,36 @@ PAGE = r"""<!doctype html>
   .hero .ctas { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-top:36px; }
   .frame-wrap { perspective:1600px; margin:70px auto 0; max-width:1180px; }
   .frame { border-radius:20px; padding:0; background:transparent; transform-origin:center top; will-change:transform; }
+  .demo { display:grid; grid-template-columns:330px 1fr; text-align:left; background:#0b0f17; color:#e8edf5; border-radius:20px; overflow:hidden;
+          box-shadow:0 40px 100px rgba(11,37,69,.22), 0 0 0 1px rgba(15,23,42,.08); transform-origin:center top; will-change:transform; }
+  .demo-side { background:#121826; padding:26px 22px; border-right:1px solid #243045; display:flex; flex-direction:column; }
+  .demo-brand { font-family:var(--display); font-weight:850; font-size:17px; margin-bottom:22px; }
+  .demo-brand span { font-family:var(--body); font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#ff8a70;
+                     border:1px solid rgba(255,107,74,.4); border-radius:999px; padding:3px 8px; margin-top:8px; display:table; white-space:nowrap; }
+  .demo-side label { display:block; font-size:13px; color:#93a1b8; margin-bottom:14px; font-weight:500; }
+  .demo-side select { width:100%; margin-top:6px; background:#0b0f17; color:#e8edf5; border:1px solid #2b3850; border-radius:10px; padding:10px 34px 10px 12px;
+                      font:500 14px var(--body); appearance:none; -webkit-appearance:none; cursor:pointer;
+                      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2393a1b8' stroke-width='1.8' fill='none'/%3E%3C/svg%3E");
+                      background-repeat:no-repeat; background-position:right 12px center; }
+  .demo-side select:disabled { opacity:.55; cursor:not-allowed; }
+  .demo-side select:focus { outline:2px solid rgba(255,107,74,.6); outline-offset:1px; }
+  .demo-def { font-size:13px; color:#93a1b8; line-height:1.5; margin-top:4px; }
+  .demo-cta { margin-top:auto; padding-top:18px; font-size:13px; color:#93a1b8; }
+  .demo-cta a { color:#ff8a70; font-weight:700; text-decoration:none; }
+  .demo-main { padding:22px 28px 18px; min-width:0; }
+  .demo-top { font-size:12.5px; color:#93a1b8; margin-bottom:10px; } .demo-top .live { color:#34d399; font-weight:700; margin-right:6px; }
+  .demo-main h3 { font-family:var(--display); font-size:24px; color:#fff; margin-bottom:14px; }
+  .demo-metrics { display:grid; grid-template-columns:repeat(5, 1fr); gap:10px; }
+  .demo-metrics .m { background:rgba(148,163,184,.07); border:1px solid rgba(148,163,184,.18); border-radius:12px; padding:10px 12px; min-width:0; }
+  .demo-metrics .k { font-size:11.5px; color:#93a1b8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .demo-metrics .v { font-size:21px; font-weight:600; margin-top:4px; white-space:nowrap; }
+  .demo-verdict { margin:12px 0 4px; padding:12px 14px; border-radius:12px; font-size:14px; line-height:1.5; }
+  .demo-verdict.ok { background:rgba(16,185,129,.12); color:#a7f3d0; } .demo-verdict.warn { background:rgba(245,158,11,.12); color:#fde68a; }
+  .demo-verdict.info { background:rgba(59,130,246,.13); color:#bfdbfe; } .demo-verdict b { color:#fff; }
+  .demo-note { font-size:12.5px; color:#93a1b8; min-height:16px; }
+  @media (max-width: 960px) { .demo { grid-template-columns:1fr; } .demo-side { border-right:none; border-bottom:1px solid #243045; }
+    .demo-metrics { grid-template-columns:repeat(3, 1fr); } }
+  @media (max-width: 560px) { .demo-metrics { grid-template-columns:repeat(2, 1fr); } .demo-main { padding:18px; } }
   .frame img { display:block; width:100%; border-radius:20px; box-shadow:0 40px 100px rgba(11,37,69,.20), 0 0 0 1px rgba(15,23,42,.06); }
   .ribbon { display:flex; height:16px; border-radius:8px; overflow:hidden; margin:34px auto 0; max-width:1180px; }
   .ribbon i { flex:1; }
@@ -297,7 +372,24 @@ PAGE = r"""<!doctype html>
     __HERO_CTA__
     <a class="btn btn-ghost" href="__SLIDES__">▶ Watch the 7-slide demo</a>
   </div>
-  <div class="frame-wrap rv" style="--d:320"><div class="frame" id="frame"><img src="img/app.png" alt="The Earth System Trend Detective app"></div></div>
+  <div class="frame-wrap rv" style="--d:320"><div class="demo" id="frame">
+    <aside class="demo-side">
+      <div class="demo-brand">🔎 Trend Detective <span>live demo</span></div>
+      <label>Location<select id="d-loc"></select></label>
+      <label>Earth science variable<select id="d-var"></select></label>
+      <label>Season<select id="d-sea"></select></label>
+      <p class="demo-def" id="d-def"></p>
+      <div class="demo-cta">__DEMO_CTA__</div>
+    </aside>
+    <div class="demo-main">
+      <div class="demo-top"><span class="live">● Live</span> Computed in your browser from NASA POWER data, with the app's own statistics.</div>
+      <h3 id="d-title"></h3>
+      <div class="demo-metrics" id="d-metrics"></div>
+      <div class="demo-verdict" id="d-verdict"></div>
+      <div id="d-chart" style="height:300px;"></div>
+      <div class="demo-note" id="d-note"></div>
+    </div>
+  </div></div>
   <div class="ribbon rv" title="Mongolia's yearly temperature, 1981-2025">__RIBBON__</div>
   <div class="ribbon-cap">Each stripe is one year of Mongolia's average temperature, 1981-2025 (blue cooler, red warmer than 1981-2010). NASA POWER / MERRA-2.</div>
 </div></section>
@@ -457,6 +549,7 @@ PAGE = r"""<!doctype html>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 const FIGS = __FIGS__, FACTS = __FACTS__, SCANS = __SCANS__, STRIPES = __STRIPES_JSON__, USERS = __USERS_JSON__;
+const DEMO = __DEMO_JSON__;
 const CONFIG = {displaylogo:false, responsive:true, modeBarButtonsToRemove:['lasso2d','select2d','toImage']};
 const tip = document.getElementById('tip');
 
@@ -477,9 +570,76 @@ const frame = document.getElementById('frame');
 function frameFx() {
   const r = frame.getBoundingClientRect(), vh = innerHeight;
   const p = Math.min(1, Math.max(0, (vh - r.top) / (vh * 0.75)));
-  frame.style.transform = `rotateX(${(1 - p) * 22}deg) scale(${0.9 + p * 0.1})`;
+  frame.style.transform = `scale(${0.94 + p * 0.06})`;
 }
 addEventListener('scroll', () => requestAnimationFrame(frameFx), {passive:true}); frameFx();
+
+// ---------- live demo (a small version of the app, in the browser) ----------
+const DM = DEMO;
+const fmtNum = (x, unit, signed = true) => { const a = Math.abs(x), d = a >= 1 ? 2 : a >= 0.01 ? 3 : 4;
+  const t = (signed && x > 0 ? '+' : '') + x.toFixed(d); return unit ? `${t} ${unit}` : t; };
+const fmtP = p => p < 0.0001 ? '< 0.0001' : p < 0.001 ? p.toFixed(4) : p.toFixed(3);
+const pText = p => { const s = fmtP(p); return s.startsWith('<') ? `p ${s}` : `p = ${s}`; };
+const dLoc = document.getElementById('d-loc'), dVar = document.getElementById('d-var'), dSea = document.getElementById('d-sea');
+DM.locs.forEach(l => dLoc.add(new Option(l.name, l.id)));
+DM.seasons.forEach(sn => dSea.add(new Option(sn, sn)));
+function fillVars() {
+  const keep = dVar.value || 'T2M'; dVar.innerHTML = '';
+  const loc = dLoc.value, region = DM.locs.find(l => l.id === loc).region;
+  const themes = {};
+  DM.vars.forEach(v => { const has = DM.seasons.some(sn => DM.series[`${loc}|${v.id}|${sn}`]);
+    if (!has) return; (themes[v.theme] = themes[v.theme] || document.createElement('optgroup')).label = v.theme;
+    themes[v.theme].appendChild(new Option(`${v.label} (${v.unit === 'fraction' ? 'fraction, 0-1' : v.unit})`, v.id)); });
+  Object.values(themes).forEach(g => dVar.appendChild(g));
+  dVar.value = [...dVar.options].some(o => o.value === keep) ? keep : 'T2M';
+  dSea.disabled = !!region; if (region) dSea.value = 'Whole year';
+}
+function renderDemo() {
+  const loc = DM.locs.find(l => l.id === dLoc.value), v = DM.vars.find(x => x.id === dVar.value), sea = dSea.value;
+  const sr = DM.series[`${loc.id}|${v.id}|${sea}`];
+  const word = DM.word[sea], what = word ? `${word[0].toUpperCase() + word.slice(1)} ${v.label.toLowerCase()}` : v.label;
+  document.getElementById('d-def').textContent = v.def;
+  document.getElementById('d-title').textContent = `${what} · ${loc.short}`;
+  const mEl = document.getElementById('d-metrics'), vEl = document.getElementById('d-verdict'), nEl = document.getElementById('d-note');
+  if (!sr) { mEl.innerHTML = ''; vEl.className = 'demo-verdict info'; vEl.innerHTML = 'No data for this choice (for example, there is no snow in the Amazon). Try another season or variable.';
+    Plotly.purge('d-chart'); nEl.textContent = ''; return; }
+  const years = sr.y || sr.v.map((_, i) => sr.y0 + i), n = years.length, start = years[0], end = years[n - 1];
+  const xm = years.reduce((a, b) => a + b, 0) / n, sxx = years.reduce((a, x) => a + (x - xm) ** 2, 0);
+  const fit = years.map(x => sr.b + sr.s * x), half = years.map(x => sr.tc * sr.rs * Math.sqrt(1 / n + (x - xm) ** 2 / sxx));
+  const unit = v.unit === 'fraction' ? '' : v.unit;
+  mEl.innerHTML = [['Change per decade', fmtNum(sr.pd, unit)], [`Total change (${end - start} yrs)`, fmtNum(sr.tot, unit)],
+    ['Mann-Kendall p', fmtP(sr.mk)], ['t-test p', fmtP(sr.tp)], ['R² fit', sr.r2.toFixed(2)]]
+    .map(([k, val]) => `<div class="m"><div class="k" title="${k}">${k}</div><div class="v">${val}</div></div>`).join('');
+  const dir = sr.s > 0 ? 'increasing' : sr.s < 0 ? 'decreasing' : 'flat', rate = fmtNum(Math.abs(sr.pd), unit, false);
+  const tests = `t-test ${pText(sr.tp)}, Mann-Kendall ${pText(sr.mk)}`;
+  if (sr.vd === 's') { vEl.className = 'demo-verdict ok';
+    vEl.innerHTML = `✅ <b>Significant trend.</b> ${what} at <b>${loc.short}</b> is <b>${dir}</b> by about <b>${rate} per decade</b> (${start}-${end}). Both tests agree (${tests}): a run like this would happen by chance less than 5% of the time.`;
+  } else if (sr.vd === 'm') { vEl.className = 'demo-verdict warn';
+    const which = sr.tp < 0.05 ? 'The linear t-test' : 'The Mann-Kendall test', other = sr.tp < 0.05 ? 'the Mann-Kendall test' : 'the linear t-test';
+    vEl.innerHTML = `⚠️ <b>Possible trend: the tests disagree.</b> ${what} at <b>${loc.short}</b> leans <b>${dir}</b> (about ${rate} per decade, ${start}-${end}). ${which} finds it significant but ${other} does not (${tests}). Treat it as a lead, not proof.`;
+  } else { vEl.className = 'demo-verdict info';
+    vEl.innerHTML = `➖ <b>No significant trend.</b> ${what} at <b>${loc.short}</b> leans ${dir} (${fmtNum(sr.pd, unit)} per decade, ${start}-${end}), but the year-to-year ups and downs are too large to tell this apart from chance (${tests}).` +
+      (sr.yn && sr.yn > n && sr.yn <= 200 ? ` If this trend and noise continued, about <b>${sr.yn} years</b> of data would be needed to call it significant.` : ''); }
+  const notes = [];
+  if (sr.tr) notes.push('Sunlight and cloud cover are shown for 2001-2025 only, because NASA POWER changes their data source in 2001.');
+  if (sr.lag) notes.push('Neighbouring years are correlated, so the p-values may be a little optimistic.');
+  if (loc.region && !sr.tr) notes.push('The country average uses yearly values only.');
+  nEl.textContent = notes.join(' ');
+  const hv = (lbl) => `${lbl} %{x}: %{y:.3f} ${unit}<extra></extra>`;
+  Plotly.react('d-chart', [
+    {x: years.concat([...years].reverse()), y: fit.map((f, i) => f + half[i]).concat(fit.map((f, i) => f - half[i]).reverse()), fill: 'toself',
+     fillcolor: 'rgba(239,68,68,0.14)', line: {width: 0}, name: '95% confidence band ', hoverinfo: 'skip', type: 'scatter'},
+    {x: years, y: sr.v, mode: 'lines+markers', name: 'Measured value', line: {color: '#3b82f6', width: 2}, marker: {size: 5}, hovertemplate: hv(''), type: 'scatter'},
+    {x: years, y: fit, mode: 'lines', name: 'Linear trend', line: {color: '#ef4444', width: 2.5}, hovertemplate: hv('Trend'), type: 'scatter'},
+  ], {paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)', font: {family: 'Inter, sans-serif', color: '#e8edf5', size: 12},
+      margin: {l: 52, r: 8, t: 8, b: 30}, hovermode: 'x unified', showlegend: true,
+      legend: {orientation: 'h', x: 1, xanchor: 'right', y: 1.12, font: {size: 11}, itemwidth: 30, tracegroupgap: 12},
+      xaxis: {gridcolor: 'rgba(148,163,184,0.12)', zeroline: false},
+      yaxis: {title: {text: v.unit === 'fraction' ? 'fraction (0-1)' : v.unit, font: {size: 11}}, gridcolor: 'rgba(148,163,184,0.12)', zeroline: false}},
+    {displayModeBar: false, responsive: true});
+}
+dLoc.onchange = () => { fillVars(); renderDemo(); }; dVar.onchange = renderDemo; dSea.onchange = renderDemo;
+dLoc.value = 'MNG'; fillVars(); dVar.value = 'T2M'; renderDemo();
 
 // count-up numbers when they scroll into view
 function countUp(el) {
@@ -632,6 +792,9 @@ def main() -> None:
         "__SCANS__": json.dumps(scans, separators=(",", ":"), ensure_ascii=False),
         "__STRIPES_JSON__": json.dumps(stripes, separators=(",", ":")),
         "__USERS_JSON__": json.dumps(users, ensure_ascii=False),
+        "__DEMO_JSON__": json.dumps(build_demo(), separators=(",", ":"), ensure_ascii=False),
+        "__DEMO_CTA__": (f'<a href="{html.escape(app)}">Open the full app ↗</a><br>' if app else "")
+                        + "The full app adds the clickable map, year-by-year animation, scanner, compare mode and guided missions.",
         "__RIBBON__": stripes_html, "__TL_STRIPES__": stripes_html, "__TL_YEARS__": tl_years, "__PINS__": pins,
         "__STATS__": stats, "__USER_BUTTONS__": user_buttons, "__STEPS__": steps, "__SHOTS__": shots, "__MISSIONS__": missions,
         "__MAP_BUTTONS__": "".join(f'<button class="chip" data-v="{v}">{html.escape(C.VARIABLES[v]["label"])}</button>' for v in MAP_VARS),
