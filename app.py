@@ -671,7 +671,8 @@ def render_map() -> None:
         return
 
     st.markdown(f"Trend per decade in **{meta['label'].lower()}** for every NASA POWER grid cell inside Mongolia "
-                f"(about 50 km apart), yearly values {YEARS[0]}-{YEARS[1]}. Dots mark significant trends "
+                f"(about 50 km apart), yearly values {YEARS[0]}-{YEARS[1]}. Dots mark cells with Mann-Kendall p < 0.05 "
+                "before the multiple-testing correction (the last box shows the share that survives it). "
                 "(Mann-Kendall). **Hover** any cell for its numbers and **click** it to see its full story below.")
     with st.spinner("Testing every grid cell..."):
         tr = cached_grid_trends(var, YEARS[0], YEARS[1])
@@ -686,8 +687,8 @@ def render_map() -> None:
     if rn:
         c1.metric("Mongolia average, per decade", format_num(rn.per_decade, unit),
                   help=f"Area-weighted country average. Mann-Kendall {p_text(rn.mk.p)}.")
-    c2.metric("Area with significant increase", f"{area_share(tr, sig & (tr['PerDecade'] > 0)):.0f}%")
-    c3.metric("Area with significant decrease", f"{area_share(tr, sig & (tr['PerDecade'] < 0)):.0f}%")
+    c2.metric("Significant increase (p < 0.05)", f"{area_share(tr, sig & (tr['PerDecade'] > 0)):.0f}%")
+    c3.metric("Significant decrease (p < 0.05)", f"{area_share(tr, sig & (tr['PerDecade'] < 0)):.0f}%")
     bh = benjamini_hochberg(tr["PMK"].to_numpy())
     c4.metric("After correction", f"{area_share(tr, bh):.0f}%",
               help=f"Testing {len(tr)} grid cells at p < 0.05 lets about 5% pass by chance. A Benjamini-Hochberg "

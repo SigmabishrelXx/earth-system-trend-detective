@@ -87,8 +87,9 @@ Teachers can share a mission directly by adding `?mission=1` to `?mission=6` to 
   -0.17 °C per decade), but none of those trends is significant. Over the same years, winters in Svalbard (Arctic)
   (one Arctic grid point) warmed **+1.39 °C per decade** (p < 0.001): opposite directions. The suggested link
   ("warm Arctic, cold continent") is still debated, so the app presents it as an idea to test, not a result.
-- **Winds are slowing.** Country-average wind speed fell 0.039 m/s per decade (significant), with significant
-  decreases over 32% of Mongolia (16% after correction); in the South Gobi, -0.17 m/s per decade.
+- **Winds are slowing on average, but not everywhere.** Country-average wind speed fell 0.039 m/s per decade
+  (significant), with significant decreases over 32% of Mongolia (16% after correction); in the South Gobi,
+  -0.17 m/s per decade. At Lake Khuvsgul, wind rose significantly (+0.04 m/s per decade).
 - **Fewer frost days on the Eastern Steppe:** -1.5 days per decade (p = 0.04). Using only 2000-2025 the trend is no
   longer significant, which shows students why record length matters.
 - **Not everything is trending.** Country-average precipitation, root-zone soil moisture and snow depth show no

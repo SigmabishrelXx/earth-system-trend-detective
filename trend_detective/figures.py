@@ -105,7 +105,7 @@ def map_figure(tr: pd.DataFrame, var: str, boundary, picked: tuple[float, float]
         colorbar=dict(title=dict(text=f"{unit}<br>per decade", side="right")), hoverinfo="skip",
     ))
     sig = tr[tr["PMK"] < 0.05]
-    fig.add_trace(go.Scatter(x=sig["Lon"], y=sig["Lat"], mode="markers", name="Significant (Mann-Kendall p < 0.05)",
+    fig.add_trace(go.Scatter(x=sig["Lon"], y=sig["Lat"], mode="markers", name="Mann-Kendall p < 0.05 (before correction)",
                              marker=dict(size=3, color="#0b0f17"), hoverinfo="skip", unselected=KEEP))
     _add_border_and_sites(fig, boundary)
     verdict = np.where(tr["PMK"] < 0.05, "significant", "not significant")

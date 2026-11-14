@@ -95,6 +95,8 @@ def build_data(style=slide_style):
             "label": C.VARIABLES[var]["label"], "avg": format_num(r.per_decade, C.VARIABLES[var]["unit"]),
             "verdict": r.verdict, "up": round(area_share(tr, sig & (tr["PerDecade"] > 0))),
             "down": round(area_share(tr, sig & (tr["PerDecade"] < 0))),
+            "up_bh": round(area_share(tr, benjamini_hochberg(tr["PMK"].to_numpy()) & (tr["PerDecade"] > 0))),
+            "down_bh": round(area_share(tr, benjamini_hochberg(tr["PMK"].to_numpy()) & (tr["PerDecade"] < 0))),
         }
         f = map_figure(tr, var, boundary, height=540)
         for trace in f.data:
@@ -396,7 +398,7 @@ PAGE = r"""<!doctype html>
     <div class="stat" data-a="up" style="--d:2350"><div class="big hot" data-count="__WARM__" data-dec="0" data-suffix="%">__WARM__%</div>
       <div class="lbl">of Mongolia's area warming significantly<br>(__WARM_BH__% after correcting for __CELLS__ tests).</div></div>
     <div class="stat" data-a="up" style="--d:2500"><div class="big teal" data-count="__WIND_RATE__" data-dec="2" data-suffix=" m/s">__WIND_RATE_TXT__</div>
-      <div class="lbl">per decade: winds are slowing<br>across Mongolia (__WIND_VERDICT__).</div></div>
+      <div class="lbl">per decade: wind is slowing on average across<br>Mongolia (__WIND_VERDICT__), but not everywhere.</div></div>
   </div>
   <div class="abs" style="left:104px; bottom:96px; --d:2700" data-a="fade">
     <span class="chip"><b>NASA POWER</b> · Langley Research Center</span><span class="chip"><b>MERRA-2</b> · NASA GMAO model</span>
@@ -482,7 +484,7 @@ function showMap(v) {
     const f = FIGS['map_' + v]; Plotly.newPlot('fig-map', f.data, f.layout, CONFIG);
     const k = FACTS['map_' + v];
     cap.innerHTML = `<b style="color:var(--text)">${k.label}</b>: Mongolia average ${k.avg} per decade (${k.verdict}). ` +
-      `Significant increase over ${k.up}%, decrease over ${k.down}% of the area. Dots = significant. Hover any cell.`;
+      `Increase over ${k.up}% of the area (${k.up_bh}% after correction), decrease over ${k.down}% (${k.down_bh}%). Dots = p < 0.05 before correction.`;
   }
   document.querySelectorAll('#map-btns .btn').forEach(b => b.classList.toggle('on', b.dataset.v === v));
 }

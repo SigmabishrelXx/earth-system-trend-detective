@@ -398,7 +398,7 @@ PAGE = r"""<!doctype html>
   <div class="bigstats">
     <div class="card rv" style="--d:0"><div class="n hl" data-count="__T2M_RATE__" data-dec="2" data-prefix="+" data-suffix=" °C">__T2M_RATE_TXT__</div><p>per decade, Mongolia average. Significant (Mann-Kendall p = __T2M_P__).</p></div>
     <div class="card rv" style="--d:120"><div class="n hl" data-count="__WARM__" data-dec="0" data-suffix="%">__WARM__%</div><p>of Mongolia's area warming significantly; __WARM_BH__% after correcting for testing __CELLS__ grid cells at once. __COOL__% cooling.</p></div>
-    <div class="card rv" style="--d:240"><div class="n" style="color:var(--teal)" data-count="__WIND_RATE__" data-dec="2" data-suffix=" m/s">__WIND_RATE_TXT__</div><p>per decade: winds are slowing across Mongolia (__WIND_VERDICT__).</p></div>
+    <div class="card rv" style="--d:240"><div class="n" style="color:var(--teal)" data-count="__WIND_RATE__" data-dec="2" data-suffix=" m/s">__WIND_RATE_TXT__</div><p>per decade: wind is slowing on average across Mongolia (__WIND_VERDICT__), but not everywhere: at Lake Khuvsgul it is rising.</p></div>
   </div>
   <div class="twist">
     <div>
@@ -527,7 +527,7 @@ function showMap(v) {
     Plotly.newPlot('fig-map', f.data, f.layout, CONFIG).then(gd => Plotly.addFrames(gd, f.frames)).then(() => animTimer = setTimeout(animStep, 400));
     cap.innerHTML = '<b>Year by year:</b> each frame is one year compared with the 1981-2010 average of the same grid cell.';
   } else { const f = FIGS['map_' + v]; Plotly.newPlot('fig-map', f.data, f.layout, CONFIG); const k = FACTS['map_' + v];
-    cap.innerHTML = `<b>${k.label}</b>: Mongolia average ${k.avg} per decade (${k.verdict}). Significant increase over ${k.up}%, decrease over ${k.down}% of the area. Dots = significant.`; }
+    cap.innerHTML = `<b>${k.label}</b>: Mongolia average ${k.avg} per decade (${k.verdict}). Significant increase over ${k.up}% of the area (${k.up_bh}% after correcting for testing many cells), decrease over ${k.down}% (${k.down_bh}%). Dots show p < 0.05 before that correction.`; }
   document.querySelectorAll('#map-btns .chip').forEach(b => b.classList.toggle('on', b.dataset.v === v));
 }
 function showScan(site) { const s = SCANS[site];
