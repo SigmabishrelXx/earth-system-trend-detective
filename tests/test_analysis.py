@@ -16,13 +16,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from trend_detective.analysis import (  # noqa: E402
     analyze,
+    benjamini_hochberg,
     confidence_band,
     grid_trends,
     mann_kendall,
     years_needed_for_significance,
 )
 from trend_detective.catalog import MAP_VARIABLES, SEASONS, VARIABLES  # noqa: E402
-from trend_detective.data import parse_point_payload, points_in_polygons, seasonal_series  # noqa: E402
+from trend_detective.data import parse_point_payload, points_in_polygons, seasonal_series, source_consistent  # noqa: E402
 
 
 class MannKendallTests(unittest.TestCase):
@@ -130,6 +131,22 @@ class AnalyzeTests(unittest.TestCase):
         self.assertTrue((t["PMK"] < 0.05).all())
 
 
+class MultipleTestingTests(unittest.TestCase):
+    def test_benjamini_hochberg_textbook(self):
+        p = [0.001, 0.008, 0.039, 0.041, 0.042, 0.06, 0.074, 0.205, 0.212, 0.216]
+        # with q = 0.05 only the two smallest survive (0.039 > 3/10 * 0.05)
+        self.assertEqual(benjamini_hochberg(p).tolist(), [True, True] + [False] * 8)
+
+    def test_benjamini_hochberg_keeps_order_and_handles_empty(self):
+        self.assertEqual(benjamini_hochberg([0.5, 0.0001, 0.9]).tolist(), [False, True, False])
+        self.assertEqual(len(benjamini_hochberg([])), 0)
+
+    def test_pure_noise_mostly_removed(self):
+        rng = np.random.default_rng(3)
+        p = rng.uniform(size=500)
+        self.assertLessEqual(benjamini_hochberg(p).sum(), 3)
+
+
 class DataTests(unittest.TestCase):
     def test_parse_drops_fill_values(self):
         payload = {"properties": {"parameter": {"T2M": {"198101": -10.0, "198102": -999.0, "198113": -1.5}}}}
@@ -162,6 +179,18 @@ class DataTests(unittest.TestCase):
         df = self.monthly_frame("FROST_DAYS", lambda y, m: 10.0)
         s = seasonal_series(df, "FROST_DAYS", "Spring (Mar-May)")
         self.assertTrue((s["Value"] == 30.0).all())
+
+    def test_source_switch_trims_ceres_only(self):
+        years = np.arange(1990, 2011)
+        df = pd.DataFrame({"Year": years, "Value": np.arange(len(years), dtype=float)})
+        cut, trimmed = source_consistent("CLOUD_AMT", df)
+        self.assertTrue(trimmed)
+        self.assertEqual(cut["Year"].min(), 2001)
+        same, trimmed2 = source_consistent("T2M", df)
+        self.assertFalse(trimmed2)
+        self.assertEqual(len(same), len(df))
+        late, trimmed3 = source_consistent("CLOUD_AMT", df[df["Year"] >= 2001])
+        self.assertFalse(trimmed3)
 
     def test_point_in_polygon_with_hole(self):
         square = [[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]]

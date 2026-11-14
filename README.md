@@ -29,15 +29,16 @@ statistically significant.**
 
 - **Seasons:** winter, spring, summer or autumn, because a yearly average can hide opposite seasonal trends.
 - **"Guess first" game:** in a mission, students predict the trend before the evidence appears, then get feedback.
-- **Six guided demo missions** (for example *Summer vs winter in Ulaanbaatar* and *Warm Arctic, cold Mongolia?*).
+- **Six guided demo missions** (for example *Summer vs winter in Ulaanbaatar* and *Svalbard vs Ulaanbaatar winters: test a debated idea*).
   Each one sets up the app and asks the student questions. The app computes the answers. Share a mission
   directly by adding `?mission=1` ... `?mission=6` to the app link.
 - **"Years needed" hint:** when a trend is not significant, the app estimates how long a record would be needed
   if the trend and noise continued.
 - **Mongolia insights tab:** country-wide trends, a season-by-season temperature comparison for five Mongolian
   regions, and links to dzud, desertification and permafrost.
-- **Honest data handling:** the app never invents data. It warns about the 2001 change of data source for
-  sunlight and cloud cover, and about year-to-year autocorrelation.
+- **Honest data handling:** the app never invents data. Sunlight and cloud cover change data source in 2001, so the
+  scanner tests them on 2001-2025 only and the map warns about it. The map also reports the share of area that stays
+  significant after a Benjamini-Hochberg false-discovery-rate correction. Year-to-year autocorrelation is flagged.
 - **CSV download** of every series and trend line.
 - **Works offline for presets:** a snapshot of real NASA POWER data ships with the app, so the demo works on slow Wi-Fi.
 
@@ -106,6 +107,9 @@ main.py, src/power_api.py      Original daily-data downloader from kdmayer/nasa-
 - Yearly values are NASA POWER's annual values. Seasonal values combine monthly values (mean; maximum or minimum
   for temperature extremes; total for frost days). Winter = previous December + January + February.
 - The Mongolia average weights each grid cell by its area (cosine of latitude).
+- Map significance uses the Mann-Kendall test per cell; the share of area that survives a Benjamini-Hochberg
+  correction (q = 0.05) is reported too, because testing 587 cells lets about 5% pass by chance.
+- The scanner tests sunlight and cloud cover on 2001-2025 only (one data source: CERES).
 - Trend tests look for steady (linear or monotonic) change only, and assume independent years.
 - MERRA-2 grid cells are about 50 km wide: they describe a region, not one weather station.
 - Testing many variables at once means about 1 in 20 can look significant by chance.

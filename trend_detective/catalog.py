@@ -112,7 +112,7 @@ VARIABLES: dict[str, dict] = {
     },
     "GWETROOT": {
         "label": "Root-zone soil moisture",
-        "unit": "0-1",
+        "unit": "fraction",
         "raw_unit": "1",
         "theme": "Water",
         "agg": "mean",
@@ -123,7 +123,7 @@ VARIABLES: dict[str, dict] = {
     },
     "GWETTOP": {
         "label": "Surface soil moisture",
-        "unit": "0-1",
+        "unit": "fraction",
         "raw_unit": "1",
         "theme": "Water",
         "agg": "mean",
@@ -238,4 +238,5 @@ def slugify(name: str) -> str:
 
 def var_title(key: str) -> str:
     v = VARIABLES[key]
-    return f"{v['label']} ({v['unit']})"
+    unit = "fraction, 0-1" if v["unit"] == "fraction" else v["unit"]
+    return f"{v['label']} ({unit})"

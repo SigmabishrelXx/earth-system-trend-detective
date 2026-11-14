@@ -25,6 +25,7 @@ from trend_detective.analysis import (
     TrendResult,
     analyze,
     format_num,
+    benjamini_hochberg,
     format_p,
     grid_trends,
     p_text,
@@ -38,6 +39,7 @@ from trend_detective.data import (
     load_grid,
     load_point,
     seasonal_series,
+    source_consistent,
 )
 
 st.set_page_config(page_title="Earth System Trend Detective", page_icon="🔎", layout="wide")
@@ -66,19 +68,21 @@ MISSIONS: dict[str, dict | None] = {
                   "Now change 'Season' in the sidebar to Winter (Dec-Feb). Does the trend keep its direction?",
                   "Why might summers and winters behave differently?"],
     },
-    "3 · Warm Arctic, cold Mongolia?": {
+    "3 · Svalbard vs Ulaanbaatar winters: test a debated idea": {
         "loc": "Ulaanbaatar (capital)", "loc2": "Arctic (Svalbard, Norway)", "var": "T2M",
         "season": "Winter (Dec-Feb)", "compare": True,
-        "story": "The challenge says one variable can trend opposite ways in two regions even when one process connects them. "
-                 "Some scientists link fast Arctic warming to cold Eurasian winters (the 'warm Arctic, cold continent' pattern).",
+        "story": "The challenge says one variable can trend opposite ways in two regions. A debated idea, called "
+                 "'warm Arctic, cold continent', suggests fast Arctic warming could bring colder winters to parts of Asia. "
+                 "Svalbard is one Arctic grid point and Ulaanbaatar is one Mongolian point: test the idea, don't assume it.",
         "steps": ["Compare the two winter temperature trends side by side.",
                   "Are they the same direction? Are both significant?",
-                  "Read the Learn tab on why a trend can be real in one place and not in another."],
+                  "What would you need to see before calling it a real connection?"],
     },
-    "4 · Is northern Mongolia drying out?": {
+    "4 · Taiga vs Gobi: where is the soil drying?": {
         "loc": "Lake Khuvsgul (northern taiga)", "loc2": "South Gobi (Dalanzadgad)", "var": "GWETROOT",
         "season": "Whole year", "compare": True,
-        "story": "Soil moisture in the root zone decides whether grass grows. Compare the northern taiga with the Gobi.",
+        "story": "Soil moisture in the root zone decides whether grass grows. Compare the northern taiga (Lake Khuvsgul) "
+                 "with the Gobi desert-steppe (Dalanzadgad).",
         "steps": ["Look at the direction of each trend.",
                   "Which location has the stronger evidence?",
                   "Try 'Snow depth' and 'Precipitation' for Lake Khuvsgul. Do they tell the same story?"],
@@ -519,23 +523,24 @@ def render_investigate() -> None:
 # --------------------------------------------------------------------------
 # Tab: What is changing? (scan every variable)
 # --------------------------------------------------------------------------
-def scan_all(loc: dict, season: str, years: tuple[int, int]) -> list[tuple[str, pd.DataFrame, TrendResult]]:
+def scan_all(loc: dict, season: str, years: tuple[int, int]) -> list[tuple[str, pd.DataFrame, TrendResult, bool]]:
     found = []
     for var in C.VARIABLES:
         try:
             df, _, _ = get_series(loc, var, season, years)
         except DataUnavailable:
             continue
+        df, trimmed = source_consistent(var, df)
         if len(df) < 5 or df["Value"].std() == 0:
             continue
-        found.append((var, df, analyze(df)))
+        found.append((var, df, analyze(df), trimmed))
     return found
 
 
 def render_scan() -> None:
     season_eff = "Whole year" if LOC["kind"] == "region" else SEASON
     st.markdown(f"Every variable at **{LOC['short']}** "
-                f"({SEASON_WORD[season_eff] or 'whole year'}, {YEARS[0]}-{YEARS[1]}), ranked by strength of evidence.")
+                f"({SEASON_WORD[season_eff] or 'whole year'}, {YEARS[0]}-{YEARS[1]}), sorted by verdict, then by Mann-Kendall p-value.")
     try:
         with st.spinner("Testing every variable..."):
             results = scan_all(LOC, SEASON, YEARS)
@@ -547,11 +552,11 @@ def render_scan() -> None:
         return
     order = {"significant": 0, "mixed": 1, "not significant": 2}
     results.sort(key=lambda t: (order[t[2].verdict], -abs(t[2].mk.z)))
-    n_sig = sum(r.verdict == "significant" for _, _, r in results)
+    n_sig = sum(r.verdict == "significant" for _, _, r, _ in results)
     st.metric("Variables with a significant trend", f"{n_sig} of {len(results)}")
 
     rows = []
-    for var, _, r in results:
+    for var, _, r, trimmed in results:
         meta = C.VARIABLES[var]
         pct = r.percent_per_decade if meta["unit"] not in ("°C",) else None
         rows.append({
@@ -562,11 +567,12 @@ def render_scan() -> None:
             "Direction": {"increasing": "↑ up", "decreasing": "↓ down", "flat": "→ flat"}[r.direction],
             "Mann-Kendall p": format_p(r.mk.p),
             "t-test p": format_p(r.p_linear),
+            "Years tested": f"{r.start}-{r.end}" + (" (CERES only)" if trimmed else ""),
             "Data source": C.SHORT_SOURCE[meta["source"]],
         })
     st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch")
 
-    top = [t for t in results if t[2].verdict == "significant"][:6]
+    top = [t[:3] for t in results if t[2].verdict == "significant"][:6]
     if top:
         st.markdown("**Strongest signals**")
         for var, _, r in top[:3]:
@@ -587,10 +593,11 @@ def render_scan() -> None:
         fig.update_layout(height=260 * nrows, margin=dict(l=10, r=10, t=40, b=10))
         fig.update_annotations(font_size=12)
         st.plotly_chart(fig, width="stretch")
-    st.caption("Tip: pick any variable from this list in the sidebar to investigate it in detail. "
-               f"Sunlight and cloud cover change data source in {C.SOURCE_SWITCH_YEAR}, so check their trends "
-               f"from {C.SOURCE_SWITCH_YEAR} onward too. Testing many variables means about 1 in 20 can look "
-               "significant by chance.")
+    st.caption(f"Sunlight and cloud cover are tested on {C.SOURCE_SWITCH_YEAR} onward only, because NASA POWER changes their "
+               f"data source in {C.SOURCE_SWITCH_YEAR} and the jump could look like a trend. ⚠️ means only one test is "
+               "significant: a big gap between the two p-values often points to a sudden jump or an outlier rather than a "
+               "steady trend. Testing many variables means about 1 in 20 can look significant by chance. "
+               "Pick any variable in the sidebar to investigate it in detail.")
 
 
 # --------------------------------------------------------------------------
@@ -681,8 +688,14 @@ def render_map() -> None:
                   help=f"Area-weighted country average. Mann-Kendall {p_text(rn.mk.p)}.")
     c2.metric("Area with significant increase", f"{area_share(tr, sig & (tr['PerDecade'] > 0)):.0f}%")
     c3.metric("Area with significant decrease", f"{area_share(tr, sig & (tr['PerDecade'] < 0)):.0f}%")
-    c4.metric("Grid cells tested", f"{len(tr)}")
+    bh = benjamini_hochberg(tr["PMK"].to_numpy())
+    c4.metric("After correction", f"{area_share(tr, bh):.0f}%",
+              help=f"Testing {len(tr)} grid cells at p < 0.05 lets about 5% pass by chance. A Benjamini-Hochberg "
+                   "false-discovery-rate correction keeps only the cells that stay significant.")
 
+    if meta["source"] == C.CERES and YEARS[0] < C.SOURCE_SWITCH_YEAR <= YEARS[1]:
+        st.warning(f"🔍 This variable changes data source in {C.SOURCE_SWITCH_YEAR}, which can create a false trend. "
+                   f"Move the years slider to start at {C.SOURCE_SWITCH_YEAR} for a fair map.")
     # The map's last click is already in session state at the start of this run, so the chosen cell can be
     # highlighted in the same run (no second rerun needed).
     state = st.session_state.get("trend_map") or {}
@@ -699,6 +712,7 @@ def render_map() -> None:
     st.caption(
         f"Largest increase: {format_num(fastest.PerDecade, unit)} per decade near {fastest.Lat:.1f}°N {fastest.Lon:.1f}°E. "
         f"Largest decrease: {format_num(slowest.PerDecade, unit)} per decade near {slowest.Lat:.1f}°N {slowest.Lon:.1f}°E. "
+        "Neighbouring cells move together, so a significant area is not hundreds of independent results. "
         "Grid: NASA POWER native resolution (0.5° × 0.625° for MERRA-2 variables, 1° for solar). "
         "Border: Natural Earth (public domain)."
     )
@@ -738,10 +752,12 @@ def render_mongolia() -> None:
             tr_t = cached_grid_trends("T2M", YEARS[0], YEARS[1])
             warm_share = area_share(tr_t, (tr_t["PMK"] < 0.05) & (tr_t["PerDecade"] > 0)) if len(tr_t) else 0
             cool_share = area_share(tr_t, (tr_t["PMK"] < 0.05) & (tr_t["PerDecade"] < 0)) if len(tr_t) else 0
+            warm_bh = area_share(tr_t, benjamini_hochberg(tr_t["PMK"].to_numpy()) & (tr_t["PerDecade"] > 0)) if len(tr_t) else 0
             st.markdown(
                 f"🌡️ Averaged over the whole country, air temperature changed by **{format_num(temp_r.per_decade, '°C')} "
                 f"per decade** ({temp_r.verdict}), about **{format_num(temp_r.total_change, '°C')}** over "
-                f"{temp_r.end - temp_r.start} years. **{warm_share:.0f}%** of Mongolia's area shows significant warming "
+                f"{temp_r.end - temp_r.start} years. **{warm_share:.0f}%** of Mongolia's area shows significant warming ({warm_bh:.0f}% after correcting for "
+                f"testing {len(tr_t)} grid cells at once) "
                 f"and **{cool_share:.0f}%** significant cooling. For context, the IPCC puts the current global average "
                 f"warming (land and ocean together) at about {GLOBAL_WARMING_PER_DECADE} °C per decade; land usually "
                 "warms faster than the ocean."
@@ -841,8 +857,10 @@ def render_learn() -> None:
         "- **Sen's slope:** the median of the slopes between every pair of years. A robust trend rate that "
         "goes with the Mann-Kendall test.\n"
         "- **R²:** how much of the year-to-year variation the trend line explains (0 = none, 1 = all).\n"
+        "- **Testing many things at once:** if you test 587 map cells at p < 0.05, about 5% pass by chance. The map "
+        "also reports the share that survives a Benjamini-Hochberg false-discovery-rate correction.\n"
         "- **Why two tests?** When both agree, the evidence is strong. When they disagree, treat the trend as a "
-        "lead to investigate further.\n"
+        "lead to investigate further. A big gap between the two p-values often means a sudden jump or an outlier, not a steady trend.\n"
         "- **Not significant does not mean no change.** Sometimes a trend only needs a longer record. The app "
         "estimates how many years would be needed if the trend continued."
     )

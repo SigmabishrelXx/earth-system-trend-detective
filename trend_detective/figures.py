@@ -27,9 +27,10 @@ def _site_points():
 
 
 def _map_axes(fig: go.Figure, height: int = 560) -> None:
-    fig.update_xaxes(title="Longitude (°E)", showgrid=False, zeroline=False, range=MAP_X_RANGE)
+    # constrain="domain" shrinks the plot area instead of widening the axis ranges, so the map hugs Mongolia
+    fig.update_xaxes(title="Longitude (°E)", showgrid=False, zeroline=False, range=MAP_X_RANGE, constrain="domain")
     fig.update_yaxes(title="Latitude (°N)", showgrid=False, zeroline=False, scaleanchor="x",
-                     scaleratio=1 / math.cos(math.radians(47)), range=MAP_Y_RANGE)
+                     scaleratio=1 / math.cos(math.radians(47)), range=MAP_Y_RANGE, constrain="domain")
     fig.update_layout(height=height, margin=dict(l=10, r=10, t=40, b=10), plot_bgcolor="rgba(0,0,0,0)",
                       legend=dict(orientation="h", yanchor="bottom", y=1.0, xanchor="left", x=0))
 

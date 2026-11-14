@@ -60,10 +60,10 @@ USERS = [
      "q": "How do I teach climate data in one lesson?",
      "how": ["Share a ready-made mission link (…/?mission=3)", "Let students predict, then reveal the evidence", "Use the Learn tab's simple definitions"],
      "mission": 3},
-    {"id": "herder", "icon": "🐑", "name": "Herders and rural communities", "who": "Through extension workers, NGOs and soum offices",
+    {"id": "herder", "icon": "🐑", "name": "Herders and rural communities", "who": "Today through English-speaking extension workers, NGO staff and soum officials",
      "q": "Are winters, snow and pasture changing where we graze?",
      "how": ["Click their area on the map of Mongolia", "Check soil moisture, snow depth and frost days", "See the trend by season, not just by year"],
-     "mission": 4, "note": "A Mongolian-language version is our next step."},
+     "mission": 4, "note": "Next: a Mongolian-language version, so herders can use it directly."},
     {"id": "public", "icon": "📰", "name": "Journalists and curious citizens", "who": "Anyone with a basic science background",
      "q": "Is that headline about the climate true?",
      "how": ["Look at the whole-country average", "Compare two places side by side", "Read the honest warnings about data limits"],
@@ -71,17 +71,17 @@ USERS = [
 ]
 
 STEPS = [
-    {"t": "Choose what to investigate", "d": "14 NASA variables in three themes: temperature, water, air and energy. Each one has a simple definition and a note on why it matters. Or start with one of six guided missions.", "img": "app.png"},
+    {"t": "Choose what to investigate", "d": "14 NASA variables in three themes: temperature; water; and air & energy. Each one has a simple definition and a note on why it matters. Or start with one of six guided missions.", "img": "app.png"},
     {"t": "Choose where", "d": "Any point on Earth, five Mongolian regions, or all of Mongolia averaged from 587 grid cells. Click any cell on the map to see its own story.", "img": "map.png"},
     {"t": "Choose when", "d": "The whole year or one season, any years from 1981 to 2025. Seasons often tell different stories: Mongolian summers warm while winters don't.", "img": "seasons.png"},
-    {"t": "Get a verdict you can trust", "d": "A t-test with a 95% confidence interval, the Mann-Kendall test and Sen's slope. The app calls a trend significant only when both tests agree, and explains it in plain words.", "img": "investigate.png"},
+    {"t": "Get a verdict, with its uncertainty shown", "d": "A t-test with a 95% confidence interval, the Mann-Kendall test and Sen's slope. The app calls a trend significant only when both tests agree, explains it in plain words, and flags its limits: data-source changes, correlated years and testing many things at once.", "img": "investigate.png"},
 ]
 
 MISSIONS = [
     ("Is Mongolia warming?", "Start big: the average temperature of the whole country."),
     ("Summer vs winter in Ulaanbaatar", "A yearly average can hide what each season is doing."),
-    ("Warm Arctic, cold Mongolia?", "One variable, opposite directions in two connected regions."),
-    ("Is northern Mongolia drying out?", "Root-zone soil moisture in the taiga versus the Gobi."),
+    ("Svalbard vs Ulaanbaatar winters", "Opposite trends in two places: test a debated idea instead of assuming it."),
+    ("Taiga vs Gobi: where is the soil drying?", "Root-zone soil moisture at Lake Khuvsgul versus the South Gobi."),
     ("Are Gobi winds slowing down?", "The wind that lifts dust storms, tested for a trend."),
     ("Fewer frost days on the steppe?", "And why a shorter record can hide a real trend."),
 ]
@@ -94,10 +94,15 @@ PAGE = r"""<!doctype html>
 <title>Earth System Trend Detective · NASA Space Apps 2026 · Team Florensiza</title>
 <meta name="description" content="Find out what is changing in Earth's climate, where, by how much, and whether it is statistically significant. NASA POWER data, Mongolia focus. NASA Space Apps Challenge 2026, Team Florensiza (Bishrel), Ulaanbaatar.">
 <meta name="author" content="Bishrel (Team Florensiza)">
+<meta property="og:title" content="Earth System Trend Detective · NASA Space Apps 2026">
+<meta property="og:description" content="Is Mongolia's climate really changing? Find out what is changing, where, how much, and whether it is significant, with NASA data.">
+<meta property="og:image" content="https://sigmabishrelxx.github.io/earth-system-trend-detective/img/og.png">
+<meta property="og:url" content="https://sigmabishrelxx.github.io/earth-system-trend-detective/">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%94%8E%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="plotly.min.js"></script>
+<script src="plotly.min.js" defer></script>
 <style>
   :root { --bg:#f6f8fb; --card:#ffffff; --ink:#0b1220; --muted:#5b6678; --line:#e3e8f0; --navy:#0b2545; --navy2:#13396b;
           --hot:#e8552f; --hot2:#ff7a52; --cool:#2563eb; --teal:#0f9f8f; --ease:cubic-bezier(.16,1,.3,1);
@@ -287,7 +292,7 @@ PAGE = r"""<!doctype html>
 <section class="hero"><div class="wrap">
   <div class="pill rv">🛰️ NASA Space Apps 2026 · <b>Be An Earth System Trend Detective!</b></div>
   <h1 class="rv" style="--d:80">Is Mongolia's climate<br><span class="hl">really</span> changing?</h1>
-  <p class="lead rv" style="--d:160">Earth System Trend Detective turns 45 years of NASA satellite and model data into clear answers:
+  <p class="lead rv" style="--d:160">Earth System Trend Detective turns 45 years of NASA model and satellite data into clear answers:
     <b>what is changing, where, by how much, and whether it is statistically significant.</b></p>
   <div class="ctas rv" style="--d:240">
     __HERO_CTA__
@@ -366,15 +371,15 @@ PAGE = r"""<!doctype html>
   <div class="explore">
     <div class="panel rv" style="--d:200">
       <div class="chips" id="map-btns">__MAP_BUTTONS__<button class="chip" data-v="anim">▶ Year by year</button></div>
-      <div id="fig-map" style="height:520px;"></div>
+      <div id="fig-map" style="height:420px;"></div>
       <div class="cap" id="map-caption"></div>
     </div>
     <div class="panel rv" style="--d:320">
       <h3 style="font-size:20px;">What is changing here?</h3>
       <div class="chips" id="scan-btns" style="margin-top:12px;">__SCAN_BUTTONS__</div>
       <p style="font-size:15px; margin-bottom:6px;" id="scan-title"></p>
-      <table class="scan"><thead><tr><th></th><th>Variable</th><th class="r">per decade</th><th></th><th class="r">MK p</th></tr></thead><tbody id="scan-body"></tbody></table>
-      <div class="cap">✅ significant · ⚠️ tests disagree · ➖ not significant (whole year, 1981-2025)</div>
+      <table class="scan"><thead><tr><th></th><th>Variable</th><th class="r">per decade</th><th></th><th class="r">MK p</th><th class="r">t p</th></tr></thead><tbody id="scan-body"></tbody></table>
+      <div class="cap">Whole year, 1981-2025, sorted by verdict then Mann-Kendall p. ✅ both tests significant · ⚠️ only one (often a sudden jump or an outlier) · ➖ neither. * Sunlight and cloud cover tested on 2001-2025 only, because their data source changes in 2001.</div>
     </div>
   </div>
 </div></section>
@@ -391,9 +396,9 @@ PAGE = r"""<!doctype html>
     <div class="yrs">__TL_YEARS__</div>
   </div>
   <div class="bigstats">
-    <div class="card rv" style="--d:0"><div class="n hl" data-count="__T2M_RATE__" data-dec="2" data-prefix="+" data-suffix=" °C">+0.00 °C</div><p>per decade, Mongolia average. Significant (Mann-Kendall p = __T2M_P__).</p></div>
-    <div class="card rv" style="--d:120"><div class="n hl" data-count="__WARM__" data-dec="0" data-suffix="%">0%</div><p>of Mongolia's area warming significantly. __COOL__% cooling significantly.</p></div>
-    <div class="card rv" style="--d:240"><div class="n" style="color:var(--teal)" data-count="__WIND_RATE__" data-dec="2" data-suffix=" m/s">0.00 m/s</div><p>per decade: winds are slowing across Mongolia (__WIND_VERDICT__).</p></div>
+    <div class="card rv" style="--d:0"><div class="n hl" data-count="__T2M_RATE__" data-dec="2" data-prefix="+" data-suffix=" °C">__T2M_RATE_TXT__</div><p>per decade, Mongolia average. Significant (Mann-Kendall p = __T2M_P__).</p></div>
+    <div class="card rv" style="--d:120"><div class="n hl" data-count="__WARM__" data-dec="0" data-suffix="%">__WARM__%</div><p>of Mongolia's area warming significantly; __WARM_BH__% after correcting for testing __CELLS__ grid cells at once. __COOL__% cooling.</p></div>
+    <div class="card rv" style="--d:240"><div class="n" style="color:var(--teal)" data-count="__WIND_RATE__" data-dec="2" data-suffix=" m/s">__WIND_RATE_TXT__</div><p>per decade: winds are slowing across Mongolia (__WIND_VERDICT__).</p></div>
   </div>
   <div class="twist">
     <div>
@@ -401,10 +406,10 @@ PAGE = r"""<!doctype html>
       <h2 class="rv" style="--d:80; font-size:clamp(30px,3.4vw,44px);">…but not evenly</h2>
       <p class="rv" style="--d:160; margin-top:20px;"><b class="hl">Summers</b> warm significantly at __SUMMER_SIG__ of __NSITES__ Mongolian sites.</p>
       <p class="rv" style="--d:220"><b style="color:var(--cool)">Winters</b> lean colder (__WINTER_AVG__ °C per decade), but not significantly.</p>
-      <p class="rv" style="--d:280">Meanwhile <b class="hl">Arctic winters</b> warm __ARCTIC__ °C per decade: one variable, opposite directions. A lead to investigate, not proof.</p>
+      <p class="rv" style="--d:280">Meanwhile <b class="hl">Svalbard winters</b> (one Arctic grid point) warm __ARCTIC__ °C per decade: one variable, opposite directions. Whether they are connected ("warm Arctic, cold continent") is a debated idea to test, not proof.</p>
     </div>
     <div class="panel rv" style="--d:200">
-      <div class="chips" id="find-btns"><button class="chip on" data-fig="seasons">Seasons at 5 sites</button><button class="chip" data-fig="compare">Arctic vs Ulaanbaatar winters</button></div>
+      <div class="chips" id="find-btns"><button class="chip on" data-fig="seasons">Seasons at 5 sites</button><button class="chip" data-fig="compare">Svalbard vs Ulaanbaatar winters</button></div>
       <div id="fig-find" style="height:460px;"></div>
       <div class="cap" id="find-caption"></div>
     </div>
@@ -451,6 +456,7 @@ PAGE = r"""<!doctype html>
 </div></footer>
 
 <script>
+document.addEventListener("DOMContentLoaded", () => {
 const FIGS = __FIGS__, FACTS = __FACTS__, SCANS = __SCANS__, STRIPES = __STRIPES_JSON__, USERS = __USERS_JSON__;
 const CONFIG = {displaylogo:false, responsive:true, modeBarButtonsToRemove:['lasso2d','select2d','toImage']};
 const tip = document.getElementById('tip');
@@ -525,7 +531,7 @@ function showMap(v) {
   document.querySelectorAll('#map-btns .chip').forEach(b => b.classList.toggle('on', b.dataset.v === v));
 }
 function showScan(site) { const s = SCANS[site];
-  document.getElementById('scan-title').innerHTML = `<b>${site}</b>: ${s.n_sig} of ${s.n} variables have a significant trend`;
+  document.getElementById('scan-title').innerHTML = `<b>${site}</b>: ${s.n_sig} of ${s.n} variables have a significant trend <span class="muted">· top 8 shown</span>`;
   document.getElementById('scan-body').innerHTML = s.rows;
   document.querySelectorAll('#scan-btns .chip').forEach(b => b.classList.toggle('on', b.dataset.site === site)); }
 document.querySelectorAll('#map-btns .chip').forEach(b => b.onclick = () => showMap(b.dataset.v));
@@ -561,6 +567,7 @@ function runScan() {
 }
 const tlObs = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { runScan(); tlObs.unobserve(e.target); } }), {threshold:.6});
 tlObs.observe(document.getElementById('tl'));
+});
 </script>
 </body>
 </html>
@@ -574,13 +581,15 @@ def main() -> None:
     app = args.app_url.rstrip("/")
     def style(f, font_size=13):
         if any(getattr(t, "name", "") == "Mongolia border" for t in f.data):
-            f.update_layout(showlegend=False, margin=dict(l=0, r=0, t=30, b=0))  # the caption explains the dots
+            f.update_layout(showlegend=False, margin=dict(l=0, r=0, t=40, b=0), height=420)  # the caption explains the dots
+        else:
+            f.update_layout(height=460)
         return site_style(f, font_size=12 if font_size <= 16 else 13)
     figs, facts, scans, stripes = build_data(style=style)
     t, s, c = facts["t2m"], facts["seasons"], facts["compare"]
     facts["seasons_caption"] = (f"<b>Temperature trend by season:</b> summers warm significantly at {s['summer_sig']} of {s['n']} sites; "
-                                f"winters lean colder (average {s['winter_avg']:+.2f} °C per decade), significant at {s['winter_sig']}. Faded bars are not significant.")
-    facts["compare_caption"] = (f"<b>Opposite trends:</b> Arctic winters warmed {c['arctic']:+.2f} °C per decade (Mann-Kendall p = {format_p(c['arctic_p'])}) "
+                                f"winters lean colder (average {s['winter_avg']:+.2f} °C per decade), significant at {'none' if s['winter_sig'] == 0 else s['winter_sig']} of the {s['n']}. Faded bars are not significant.")
+    facts["compare_caption"] = (f"<b>Opposite trends:</b> Svalbard winters (one Arctic grid point) warmed {c['arctic']:+.2f} °C per decade (Mann-Kendall p = {format_p(c['arctic_p'])}) "
                                 f"while Ulaanbaatar winters lean {c['ub']:+.2f} °C ({c['ub_verdict']}). Lines show each place's difference from its own average.")
 
     n = len(stripes)
@@ -593,7 +602,7 @@ def main() -> None:
         f'<div class="v" style="color:{"var(--hot)" if p["val"].startswith("+") else "var(--cool)"}">{html.escape(p["val"])}</div><div class="stem"></div></div>'
         for p in facts["pins"])
     stats = "".join(
-        f'<div class="stat rv" style="--d:{k * 120}"><div class="n{" hot" if k >= 2 else ""}" data-count="{f["n"]}" data-dec="{f["dec"]}" data-suffix="{f["suffix"]}">0</div>'
+        f'<div class="stat rv" style="--d:{k * 120}"><div class="n{" hot" if k >= 2 else ""}" data-count="{f["n"]}" data-dec="{f["dec"]}" data-suffix="{f["suffix"]}">{f["n"]:.{f["dec"]}f}{f["suffix"]}</div>'
         f'<div class="l">{html.escape(f["label"])}</div><div class="s">Source: <a href="{f["url"]}">{html.escape(f["src"])}</a></div></div>'
         for k, f in enumerate(FACTS))
     users = []
@@ -628,7 +637,8 @@ def main() -> None:
         "__STATS__": stats, "__USER_BUTTONS__": user_buttons, "__STEPS__": steps, "__SHOTS__": shots, "__MISSIONS__": missions,
         "__MAP_BUTTONS__": "".join(f'<button class="chip" data-v="{v}">{html.escape(C.VARIABLES[v]["label"])}</button>' for v in MAP_VARS),
         "__SCAN_BUTTONS__": "".join(f'<button class="chip" data-site="{html.escape(k)}">{html.escape(k)}</button>' for k in scans),
-        "__T2M_RATE__": f"{t['rate']:.4f}", "__T2M_P__": format_p(t["p"]), "__WARM__": f"{t['warm']:.0f}", "__COOL__": f"{t['cool']:.0f}",
+        "__T2M_RATE__": f"{t['rate']:.4f}", "__T2M_P__": format_p(t["p"]), "__WARM__": f"{t['warm']:.0f}", "__COOL__": f"{t['cool']:.0f}", "__WARM_BH__": f"{t['warm_bh']:.0f}", "__CELLS__": str(t["cells"]),
+        "__T2M_RATE_TXT__": f"{t['rate']:+.2f} °C", "__WIND_RATE_TXT__": f"{facts['wind']['rate']:.2f} m/s",
         "__WIND_RATE__": f"{facts['wind']['rate']:.4f}", "__WIND_VERDICT__": facts["wind"]["verdict"],
         "__SUMMER_SIG__": str(s["summer_sig"]), "__NSITES__": str(s["n"]), "__WINTER_AVG__": f"{s['winter_avg']:+.2f}", "__ARCTIC__": f"{c['arctic']:+.2f}",
         "__NAV_CTA__": nav_cta, "__HERO_CTA__": hero_cta, "__FINAL_CTA__": final_cta,
@@ -643,7 +653,7 @@ def main() -> None:
     (DOCS / "img").mkdir(parents=True, exist_ok=True)
     (DOCS / "index.html").write_text(page)
     (DOCS / ".nojekyll").write_text("")
-    for name in {"app.png", *(st["img"] for st in STEPS)}:
+    for name in {"app.png", "og.png", *(st["img"] for st in STEPS)}:
         shutil.copy(ROOT / "demo" / "img" / name, DOCS / "img" / name)
     shutil.copy(Path(plotly.__file__).parent / "package_data" / "plotly.min.js", DOCS / "plotly.min.js")
     print(f"wrote docs/index.html ({(DOCS / 'index.html').stat().st_size / 1e6:.2f} MB)")

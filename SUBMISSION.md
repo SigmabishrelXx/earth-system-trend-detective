@@ -21,7 +21,8 @@ time series and runs a t-test with a 95% confidence interval, the Mann-Kendall t
 the verdict in plain language. A scanner ranks every variable by strength of evidence, a map shows where trends are
 significant across Mongolia, and a compare mode reveals opposite trends in different regions. Six guided missions
 teach students to think like detectives. Example finding: averaged over Mongolia, air temperature rose 0.18 °C per
-decade (significant), with significant warming across 62% of the country, and summers are warming while winters are not.
+decade (significant), with significant warming across more than half of the country, and summers are warming while winters
+are not.
 
 ## Link to Project Demo
 
@@ -70,23 +71,24 @@ Trend Detective does all of this in one browser page, with no installation or lo
    opposite directions, which the challenge highlights as a key difficulty.
 
 **Guided missions.** Six demo missions set up the app and ask questions, for example *Summer vs winter in
-Ulaanbaatar*, *Warm Arctic, cold Mongolia?*, *Is northern Mongolia drying out?* and *Are Gobi winds slowing down?*
+Ulaanbaatar*, *Svalbard vs Ulaanbaatar winters: test a debated idea*, *Taiga vs Gobi: where is the soil drying?*
+and *Are Gobi winds slowing down?*
 Before the evidence appears, students make a guess ("going up", "going down" or "no real trend") and get feedback,
 so they practise reading evidence instead of being told results.
 Teachers can share a mission directly by adding `?mission=1` to `?mission=6` to the app link.
 
 **What I found (NASA POWER, 1981-2025).**
 - **Mongolia is warming.** The country-average air temperature rose **+0.18 °C per decade** (t-test p = 0.009,
-  Mann-Kendall p = 0.005), about +0.8 °C over 44 years. **62%** of Mongolia's area shows significant warming and
-  none shows significant cooling. Warming is strongest in the south-west (Altai and Gobi-Altai) and north-east, up to
+  Mann-Kendall p = 0.005), about +0.8 °C over 44 years. **62%** of Mongolia's area shows significant warming (**55%**
+  after a Benjamini-Hochberg correction for testing 587 grid cells at once) and none shows significant cooling. Warming is strongest in the south-west (Altai and Gobi-Altai) and north-east, up to
   +0.40 °C per decade, and weakest in the central Gobi.
 - **Seasons tell different stories.** Summer warming is significant at 3 of the 5 Mongolian sites (average
   +0.33 °C per decade; Ulaanbaatar +0.30 °C, p = 0.02). Winters lean colder at all five sites (average
   -0.17 °C per decade), but none of those trends is significant. Over the same years, winters in Svalbard (Arctic)
-  warmed **+1.39 °C per decade** (p < 0.001): opposite directions, consistent with the "warm Arctic, cold
-  continent" pattern some scientists describe, though this data alone cannot prove the link.
+  (one Arctic grid point) warmed **+1.39 °C per decade** (p < 0.001): opposite directions. The suggested link
+  ("warm Arctic, cold continent") is still debated, so the app presents it as an idea to test, not a result.
 - **Winds are slowing.** Country-average wind speed fell 0.039 m/s per decade (significant), with significant
-  decreases over 32% of Mongolia; in the South Gobi, -0.17 m/s per decade.
+  decreases over 32% of Mongolia (16% after correction); in the South Gobi, -0.17 m/s per decade.
 - **Fewer frost days on the Eastern Steppe:** -1.5 days per decade (p = 0.04). Using only 2000-2025 the trend is no
   longer significant, which shows students why record length matters.
 - **Not everything is trending.** Country-average precipitation, root-zone soil moisture and snow depth show no
@@ -98,12 +100,13 @@ that lets students in Ulaanbaatar test these changes themselves, with NASA data 
 skills and climate literacy the country needs.
 
 **Scientific honesty built in.** The app never invents data: when NASA POWER cannot be reached it uses a bundled
-snapshot of real NASA data, or says clearly that data is unavailable. It warns when sunlight and cloud cover cross
-the 2001 change of data source, when neighbouring years are correlated, and that testing many variables means some
-will look significant by chance.
+snapshot of real NASA data, or says clearly that data is unavailable. Because sunlight and cloud cover change data
+source in 2001, the scanner tests them on 2001-2025 only (a sunlight "trend" in the Gobi disappeared when we did this).
+The map reports how much area stays significant after a false-discovery-rate correction. The app also warns when
+neighbouring years are correlated, and shows both p-values so a disagreement between the tests can be seen.
 
 **Tools used.** Python, Streamlit, Plotly, pandas, NumPy and SciPy, starting from the open-source
-kdmayer/nasa-power-api downloader (MIT License). The statistics are covered by 20 unit tests (including a check of
+kdmayer/nasa-power-api downloader (MIT License). The statistics are covered by 24 unit tests (including a check of
 the Mann-Kendall implementation against SciPy's Kendall tau). The app can be hosted free on Streamlit Community Cloud.
 
 **Audience.** High school and university students and members of the public with some science background, as the

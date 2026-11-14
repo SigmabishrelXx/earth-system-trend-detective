@@ -259,3 +259,14 @@ def country_monthly_frame(grid: pd.DataFrame) -> pd.DataFrame:
     if not frames:
         return pd.DataFrame(columns=["Variable", "Year", "Month", "Value"])
     return pd.concat(frames, ignore_index=True)
+
+
+def source_consistent(var: str, df: pd.DataFrame) -> tuple[pd.DataFrame, bool]:
+    """For sunlight and cloud cover, keep only 2001 onward when a record crosses the 2001 change of
+    data source (GEWEX SRB -> CERES), so a step at the switch is not mistaken for a trend.
+    Returns (series, trimmed)."""
+    from .catalog import CERES, SOURCE_SWITCH_YEAR
+
+    if VARIABLES[var]["source"] == CERES and len(df) and df["Year"].min() < SOURCE_SWITCH_YEAR <= df["Year"].max():
+        return df[df["Year"] >= SOURCE_SWITCH_YEAR].reset_index(drop=True), True
+    return df, False

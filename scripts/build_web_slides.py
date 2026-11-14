@@ -30,8 +30,8 @@ import plotly.io as pio
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from trend_detective import catalog as C  # noqa: E402
-from trend_detective.analysis import analyze, format_num, format_p, grid_trends  # noqa: E402
-from trend_detective.data import country_average, load_boundary, load_grid, load_point, seasonal_series  # noqa: E402
+from trend_detective.analysis import analyze, benjamini_hochberg, format_num, format_p, grid_trends  # noqa: E402
+from trend_detective.data import country_average, load_boundary, load_grid, load_point, seasonal_series, source_consistent  # noqa: E402
 from trend_detective.figures import anomaly_animation, compare_figure, map_figure, seasons_figure, slide_style  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -43,8 +43,18 @@ Y0, Y1 = C.START_YEAR, C.END_YEAR
 BAND = dict(x=104, y=330, w=1712, h=210)  # timeline band on slide 5 (canvas px)
 
 
+def _round(obj, nd: int = 4):
+    if isinstance(obj, float):
+        return round(obj, nd)
+    if isinstance(obj, list):
+        return [_round(v, nd) for v in obj]
+    if isinstance(obj, dict):
+        return {k: _round(v, nd) for k, v in obj.items()}
+    return obj
+
+
 def fig_json(fig) -> dict:
-    return json.loads(pio.to_json(fig, validate=False))
+    return _round(json.loads(pio.to_json(fig, validate=False)))
 
 
 def area_share(tr: pd.DataFrame, mask) -> float:
@@ -95,7 +105,9 @@ def build_data(style=slide_style):
         if var == "T2M":
             facts["t2m"] = {"rate": r.per_decade, "p": r.mk.p, "total": r.total_change,
                             "warm": area_share(tr, sig & (tr["PerDecade"] > 0)),
-                            "cool": area_share(tr, sig & (tr["PerDecade"] < 0))}
+                            "cool": area_share(tr, sig & (tr["PerDecade"] < 0)),
+                            "warm_bh": area_share(tr, benjamini_hochberg(tr["PMK"].to_numpy()) & (tr["PerDecade"] > 0)),
+                            "cells": len(tr)}
         if var == "WS2M":
             facts["wind"] = {"rate": r.per_decade, "verdict": r.verdict}
     gv = grid[(grid["Variable"] == "T2M") & grid["InMongolia"]]
@@ -113,16 +125,18 @@ def build_data(style=slide_style):
         monthly, _ = load_point(lat, lon)
         rows = []
         for var in C.VARIABLES:
-            s = seasonal_series(monthly, var, "Whole year")
+            s, trimmed = source_consistent(var, seasonal_series(monthly, var, "Whole year"))
             if len(s) >= 5 and s["Value"].std() > 0:
-                rows.append((var, analyze(s)))
-        rows.sort(key=lambda t: (order[t[1].verdict], -abs(t[1].mk.z)))
+                rows.append((var, analyze(s), trimmed))
+        rows.sort(key=lambda t: (order[t[1].verdict], t[1].mk.p))
         body = "".join(
-            f'<tr class="{r.verdict.replace(" ", "-")}"><td>{verdict_icon(r)}</td><td>{html.escape(C.VARIABLES[v]["label"])}</td>'
+            f'<tr class="{r.verdict.replace(" ", "-")}"><td>{verdict_icon(r)}</td><td>{html.escape(C.VARIABLES[v]["label"])}'
+            f'{"<sup>*</sup>" if trimmed else ""}</td>'
             f'<td class="r">{html.escape(format_num(r.per_decade, C.VARIABLES[v]["unit"]))}</td>'
-            f'<td class="r">{"↑" if r.slope > 0 else "↓"}</td><td class="r">{html.escape(format_p(r.mk.p))}</td></tr>'
-            for v, r in rows[:8])
-        scans[site.split(" (")[0]] = {"n_sig": sum(r.verdict == "significant" for _, r in rows), "n": len(rows), "rows": body}
+            f'<td class="r">{"↑" if r.slope > 0 else "↓"}</td><td class="r">{html.escape(format_p(r.mk.p))}</td>'
+            f'<td class="r">{html.escape(format_p(r.p_linear))}</td></tr>'
+            for v, r, trimmed in rows[:8])
+        scans[site.split(" (")[0]] = {"n_sig": sum(r.verdict == "significant" for _, r, _ in rows), "n": len(rows), "rows": body}
         for season in list(C.SEASONS)[1:]:
             r = analyze(seasonal_series(monthly, "T2M", season))
             seasons_rows.append((site.split(" (")[0], season.split(" ")[0].lower(), r.per_decade, r.verdict == "significant"))
@@ -154,10 +168,15 @@ PAGE = r"""<!doctype html>
 <title>Earth System Trend Detective · Team Florensiza · NASA Space Apps 2026</title>
 <meta name="description" content="Interactive 7-slide demo for the NASA Space Apps Challenge 2026 challenge Be An Earth System Trend Detective! by Team Florensiza (Bishrel), Ulaanbaatar. Made with help from Claude Code (AI).">
 <meta name="author" content="Bishrel (Team Florensiza)">
+<meta property="og:title" content="Earth System Trend Detective · 7-slide demo">
+<meta property="og:description" content="Is Mongolia's climate really changing? NASA data, honest statistics. NASA Space Apps 2026, Team Florensiza.">
+<meta property="og:image" content="https://sigmabishrelxx.github.io/earth-system-trend-detective/img/og.png">
+<meta property="og:url" content="https://sigmabishrelxx.github.io/earth-system-trend-detective/slides/">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%94%8E%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="../plotly.min.js"></script>
+<script src="../plotly.min.js" defer></script>
 <style>
   :root { --bg:#0b0f17; --panel:rgba(18,24,38,.82); --line:#243045; --text:#e8edf5; --muted:#93a1b8; --hot:#ff6b4a; --cool:#4d9fff;
           --teal:#2dd4bf; --gold:#fbbf24; --ease:cubic-bezier(.65,0,.35,1); --out:cubic-bezier(.16,1,.3,1);
@@ -356,10 +375,10 @@ PAGE = r"""<!doctype html>
       <div class="btns" id="scan-btns">__SCAN_BUTTONS__</div>
       <div class="card" style="padding:18px 22px;">
         <p style="font-size:23px; margin-bottom:8px;" id="scan-title"></p>
-        <table class="scan"><thead><tr><th></th><th>Variable</th><th style="text-align:right">per decade</th><th></th><th style="text-align:right">MK p</th></tr></thead>
+        <table class="scan"><thead><tr><th></th><th>Variable</th><th style="text-align:right">per decade</th><th></th><th style="text-align:right">MK p</th><th style="text-align:right">t p</th></tr></thead>
         <tbody id="scan-body"></tbody></table>
       </div>
-      <div class="caption">All 14 variables at one place, ranked by evidence. ✅ significant · ⚠️ tests disagree · ➖ not significant</div>
+      <div class="caption">Sorted by verdict, then Mann-Kendall p. ✅ both tests significant · ⚠️ only one (often a jump or outlier) · ➖ neither. * Sunlight and cloud tested on 2001-2025 only (data source changes in 2001).</div>
     </div>
   </div>
 </section>
@@ -372,11 +391,11 @@ PAGE = r"""<!doctype html>
   __PINS__
   __YEARS__
   <div class="abs" style="left:104px; right:104px; top:640px; display:grid; grid-template-columns:repeat(3, 1fr); gap:40px;">
-    <div class="stat" data-a="up" style="--d:2200"><div class="big hot" data-count="__T2M_RATE__" data-dec="2" data-prefix="+" data-suffix=" °C">+0.00 °C</div>
+    <div class="stat" data-a="up" style="--d:2200"><div class="big hot" data-count="__T2M_RATE__" data-dec="2" data-prefix="+" data-suffix=" °C">__T2M_RATE_TXT__</div>
       <div class="lbl">per decade, Mongolia average.<br>Significant (Mann-Kendall p = __T2M_P__).</div></div>
-    <div class="stat" data-a="up" style="--d:2350"><div class="big hot" data-count="__WARM__" data-dec="0" data-suffix="%">0%</div>
-      <div class="lbl">of Mongolia's area warming significantly.<br>__COOL__% cooling significantly.</div></div>
-    <div class="stat" data-a="up" style="--d:2500"><div class="big teal" data-count="__WIND_RATE__" data-dec="2" data-suffix=" m/s">0.00 m/s</div>
+    <div class="stat" data-a="up" style="--d:2350"><div class="big hot" data-count="__WARM__" data-dec="0" data-suffix="%">__WARM__%</div>
+      <div class="lbl">of Mongolia's area warming significantly<br>(__WARM_BH__% after correcting for __CELLS__ tests).</div></div>
+    <div class="stat" data-a="up" style="--d:2500"><div class="big teal" data-count="__WIND_RATE__" data-dec="2" data-suffix=" m/s">__WIND_RATE_TXT__</div>
       <div class="lbl">per decade: winds are slowing<br>across Mongolia (__WIND_VERDICT__).</div></div>
   </div>
   <div class="abs" style="left:104px; bottom:96px; --d:2700" data-a="fade">
@@ -393,11 +412,11 @@ PAGE = r"""<!doctype html>
     <div>
       <p data-a="up" style="--d:350; font-size:31px;"><b class="hot">Summers</b> warm significantly at __SUMMER_SIG__ of __NSITES__ Mongolian sites.</p>
       <p data-a="up" style="--d:500; font-size:31px; margin-top:22px;"><b class="cool">Winters</b> lean colder (__WINTER_AVG__ °C per decade), but not significantly.</p>
-      <p data-a="up" style="--d:650; font-size:31px; margin-top:22px;">Meanwhile <b class="hot">Arctic winters</b> warm __ARCTIC__ °C per decade.</p>
-      <p data-a="up" style="--d:800; font-size:24px; margin-top:28px;" class="muted">One variable, opposite directions. The link is a lead to investigate, not proof.</p>
+      <p data-a="up" style="--d:650; font-size:31px; margin-top:22px;">Meanwhile <b class="hot">Svalbard winters</b> (one Arctic grid point) warm __ARCTIC__ °C per decade.</p>
+      <p data-a="up" style="--d:800; font-size:24px; margin-top:28px;" class="muted">One variable, opposite directions. Whether the two are connected ("warm Arctic, cold continent") is a debated idea to test, not proof.</p>
     </div>
     <div data-a="lens" style="--d:300">
-      <div class="btns" id="find-btns"><button class="btn on" data-fig="seasons">Seasons at 5 sites</button><button class="btn" data-fig="compare">Arctic vs Ulaanbaatar winters</button></div>
+      <div class="btns" id="find-btns"><button class="btn on" data-fig="seasons">Seasons at 5 sites</button><button class="btn" data-fig="compare">Svalbard vs Ulaanbaatar winters</button></div>
       <div id="fig-find" style="height:540px;"></div>
       <div class="caption" id="find-caption"></div>
     </div>
@@ -435,6 +454,7 @@ PAGE = r"""<!doctype html>
 </div>
 
 <script>
+document.addEventListener("DOMContentLoaded", () => {
 const FIGS = __FIGS__, FACTS = __FACTS__, SCANS = __SCANS__, STRIPES = __STRIPES_JSON__;
 const BAND = __BAND__;
 const CONFIG = {displaylogo:false, responsive:true, modeBarButtonsToRemove:['lasso2d','select2d','toImage']};
@@ -468,7 +488,7 @@ function showMap(v) {
 }
 function showScan(site) {
   const s = SCANS[site];
-  document.getElementById('scan-title').innerHTML = `<b>${site}</b>: ${s.n_sig} of ${s.n} variables have a significant trend`;
+  document.getElementById('scan-title').innerHTML = `<b>${site}</b>: ${s.n_sig} of ${s.n} variables have a significant trend <span class="muted">· top 8 shown</span>`;
   document.getElementById('scan-body').innerHTML = s.rows;
   document.querySelectorAll('#scan-btns .btn').forEach(b => b.classList.toggle('on', b.dataset.site === site));
 }
@@ -559,6 +579,7 @@ addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, {passive:tru
 addEventListener('touchend', e => { if (tx === null) return; const dx = e.changedTouches[0].clientX - tx;
   if (Math.abs(dx) > 50) go(cur + (dx < 0 ? 1 : -1)); tx = null; });
 go((parseInt(location.hash.slice(1)) || 1) - 1);
+});
 </script>
 </body>
 </html>
@@ -573,10 +594,10 @@ def main() -> None:
     t, s, c = facts["t2m"], facts["seasons"], facts["compare"]
     facts["seasons_caption"] = (f"<b style='color:var(--text)'>Temperature trend by season:</b> summers warm significantly at "
                                 f"{s['summer_sig']} of {s['n']} sites; winters lean colder (average {s['winter_avg']:+.2f} °C per decade), "
-                                f"significant at {s['winter_sig']}. Faded bars are not significant. Hover the bars.")
-    facts["compare_caption"] = (f"<b style='color:var(--text)'>Opposite trends:</b> Arctic winters warmed {c['arctic']:+.2f} °C per decade "
-                                f"(Mann-Kendall p = {format_p(c['arctic_p'])}) while Ulaanbaatar winters lean {c['ub']:+.2f} °C "
-                                f"({c['ub_verdict']}). Lines show each place's difference from its own average.")
+                                f"significant at {'none' if s['winter_sig'] == 0 else s['winter_sig']} of the {s['n']}. Faded bars are not significant. Hover the bars.")
+    facts["compare_caption"] = (f"<b style='color:var(--text)'>Opposite trends:</b> Svalbard winters (one Arctic grid point) warmed "
+                                f"{c['arctic']:+.2f} °C per decade (Mann-Kendall p = {format_p(c['arctic_p'])}) while Ulaanbaatar winters "
+                                f"lean {c['ub']:+.2f} °C ({c['ub_verdict']}). Lines show each place's difference from its own average.")
 
     n = len(stripes)
     sx, sy = BAND["w"] / 1920, BAND["h"] / 1080
@@ -608,7 +629,8 @@ def main() -> None:
         "__MAP_BUTTONS__": "".join(f'<button class="btn" data-v="{v}">{html.escape(C.VARIABLES[v]["label"])}</button>' for v in MAP_VARS),
         "__SCAN_BUTTONS__": "".join(f'<button class="btn" data-site="{html.escape(k)}">{html.escape(k)}</button>' for k in scans),
         "__T2M_RATE__": f"{t['rate']:.4f}", "__T2M_P__": format_p(t["p"]),
-        "__WARM__": f"{t['warm']:.0f}", "__COOL__": f"{t['cool']:.0f}",
+        "__WARM__": f"{t['warm']:.0f}", "__COOL__": f"{t['cool']:.0f}", "__WARM_BH__": f"{t['warm_bh']:.0f}", "__CELLS__": str(t["cells"]),
+        "__T2M_RATE_TXT__": f"{t['rate']:+.2f} °C", "__WIND_RATE_TXT__": f"{facts['wind']['rate']:.2f} m/s",
         "__WIND_RATE__": f"{facts['wind']['rate']:.4f}", "__WIND_VERDICT__": facts["wind"]["verdict"],
         "__SUMMER_SIG__": str(s["summer_sig"]), "__NSITES__": str(s["n"]), "__WINTER_AVG__": f"{s['winter_avg']:+.2f}",
         "__ARCTIC__": f"{c['arctic']:+.2f}",

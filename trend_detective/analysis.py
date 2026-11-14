@@ -223,3 +223,21 @@ def format_num(x: float, unit: str = "", digits: int | None = None, signed: bool
         digits = 2 if ax >= 1 else 3 if ax >= 0.01 else 4
     s = f"{x:+.{digits}f}" if signed else f"{x:.{digits}f}"
     return f"{s} {unit}".strip()
+
+
+def benjamini_hochberg(pvals, q: float = 0.05) -> np.ndarray:
+    """Which tests stay significant after a Benjamini-Hochberg false-discovery-rate correction.
+
+    Used for the map: testing hundreds of grid cells at p < 0.05 lets about 5% pass by chance.
+    """
+    p = np.asarray(pvals, dtype=float)
+    n = len(p)
+    out = np.zeros(n, dtype=bool)
+    if n == 0:
+        return out
+    order = np.argsort(p)
+    passed = p[order] <= q * np.arange(1, n + 1) / n
+    if passed.any():
+        k = int(np.max(np.nonzero(passed)[0])) + 1
+        out[order[:k]] = True
+    return out
