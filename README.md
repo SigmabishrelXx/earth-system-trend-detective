@@ -9,7 +9,7 @@ and find out **what is changing, where it is changing, how much it is changing, 
 statistically significant.**
 
 **Live app:** _add your Streamlit Community Cloud link here after deploying_
-**Interactive demo slides (7):** https://sigmabishrelxx.github.io/earth-system-trend-detective/ (live charts; PDF version: [demo/Earth_System_Trend_Detective_slides.pdf](demo/Earth_System_Trend_Detective_slides.pdf))
+**Interactive demo slides (7):** https://sigmabishrelxx.github.io/earth-system-trend-detective/ (cinematic, live charts; storyboard: [demo/STORYBOARD.md](demo/STORYBOARD.md); PDF version: [demo/Earth_System_Trend_Detective_slides.pdf](demo/Earth_System_Trend_Detective_slides.pdf))
 
 ---
 
