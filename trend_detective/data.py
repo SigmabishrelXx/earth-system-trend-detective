@@ -7,6 +7,8 @@ Order of preference for a point location:
 
 Nothing here ever invents data: if NASA POWER cannot be reached and no saved copy
 exists, a DataUnavailable error is raised and the app says so.
+
+AI disclosure: written with help from Claude Code (Anthropic's AI coding assistant). See README, "Use of AI".
 """
 
 from __future__ import annotations

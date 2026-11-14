@@ -4,6 +4,8 @@ Three complementary checks, as suggested in the challenge brief:
   * Ordinary least-squares linear trend with a t-test and a 95% confidence interval
   * Mann-Kendall test (non-parametric, robust to outliers and non-normal data)
   * Sen's slope (median of all pairwise slopes) with its 95% confidence interval
+
+AI disclosure: written with help from Claude Code (Anthropic's AI coding assistant). See README, "Use of AI".
 """
 
 from __future__ import annotations

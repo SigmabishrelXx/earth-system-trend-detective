@@ -5,6 +5,8 @@ Team Florensiza - Ulaanbaatar, Mongolia
 
 Run locally:   python3 -m streamlit run app.py
 Tests:         python3 -m unittest discover -s tests -v
+
+AI disclosure: written with help from Claude Code (Anthropic's AI coding assistant). See README, "Use of AI".
 """
 
 from __future__ import annotations
@@ -135,6 +137,16 @@ def apply_mission() -> None:
     if "loc2" in m:
         st.session_state["loc2"] = m["loc2"]
     st.session_state["years"] = (C.START_YEAR, C.END_YEAR)
+
+
+# Shareable mission links: ?mission=1 ... ?mission=6 opens that mission (applied once per visit).
+MISSION_BY_NUMBER = {str(i): name for i, name in enumerate(MISSIONS) if i > 0}
+if not st.session_state.get("_link_applied"):
+    st.session_state["_link_applied"] = True
+    linked = MISSION_BY_NUMBER.get(str(st.query_params.get("mission", "")))
+    if linked:
+        st.session_state["mission"] = linked
+        apply_mission()
 
 
 # --------------------------------------------------------------------------
@@ -678,7 +690,8 @@ def render_mongolia() -> None:
                 "Numbers update when you change the years in the sidebar.")
     if HAS_GRID:
         st.subheader("Mongolia as a whole")
-        cols = st.columns(len(INSIGHT_VARS))
+        st.caption("Country-average change per decade (✅ significant, ⚠️ tests disagree, ➖ not significant).")
+        cols = st.columns(3) + st.columns(3)
         temp_r = None
         for col, var in zip(cols, INSIGHT_VARS):
             nat = cached_country_series(var)
@@ -689,7 +702,7 @@ def render_mongolia() -> None:
             if var == "T2M":
                 temp_r = r
             col.metric(f"{verdict_icon(r)} {C.VARIABLES[var]['label']}",
-                       format_num(r.per_decade, C.VARIABLES[var]["unit"]) + "/dec",
+                       format_num(r.per_decade, C.VARIABLES[var]["unit"]),
                        help=f"Country average, per decade. Mann-Kendall {p_text(r.mk.p)}; verdict: {r.verdict}.")
         if temp_r:
             tr_t = cached_grid_trends("T2M", YEARS[0], YEARS[1])

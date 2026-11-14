@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Earth System Trend Detective - Team Florensiza - NASA Space Apps 2026</title>
+<meta name="author" content="Bishrel (Team Florensiza)">
+<meta name="description" content="Project demo for the NASA Space Apps Challenge 2026 challenge Be An Earth System Trend Detective! Slides made with help from Claude Code (AI).">
+<style>
+  @page { size: 1920px 1080px; margin: 0; }
+  :root {
+    --bg: #0b0f17;
+    --panel: #121826;
+    --line: #243045;
+    --text: #e8edf5;
+    --muted: #93a1b8;
+    --hot: #ff6b4a;
+    --cool: #4d9fff;
+    --teal: #2dd4bf;
+    --gold: #fbbf24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); }
+  body {
+    font-family: -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    color: var(--text);
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .slide {
+    width: 1920px; height: 1080px; position: relative; overflow: hidden;
+    padding: 84px 104px 76px; page-break-after: always; break-after: page;
+    background:
+      radial-gradient(1100px 700px at 100% 0%, rgba(255,107,74,0.10), transparent 60%),
+      radial-gradient(900px 600px at 0% 100%, rgba(45,212,191,0.07), transparent 60%),
+      var(--bg);
+    display: flex; flex-direction: column;
+  }
+  .slide:last-child { page-break-after: auto; break-after: auto; }
+  .kicker { font-size: 22px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--hot); font-weight: 700; }
+  h1 { font-size: 112px; line-height: 1.0; font-weight: 800; letter-spacing: -0.02em; }
+  h2 { font-size: 64px; line-height: 1.08; font-weight: 800; letter-spacing: -0.015em; margin: 14px 0 0; }
+  h3 { font-size: 34px; font-weight: 700; margin-bottom: 10px; }
+  p, li { font-size: 30px; line-height: 1.38; }
+  .muted { color: var(--muted); }
+  .hot { color: var(--hot); } .cool { color: var(--cool); } .teal { color: var(--teal); } .gold { color: var(--gold); }
+  .pagenum { position: absolute; right: 104px; bottom: 40px; font-size: 20px; color: var(--muted); letter-spacing: 0.08em; }
+  .brand { position: absolute; left: 104px; bottom: 40px; font-size: 20px; color: var(--muted); letter-spacing: 0.08em; }
+  .shot { border-radius: 18px; border: 1px solid var(--line); box-shadow: 0 30px 80px rgba(0,0,0,0.55); display: block; background: #181818; }
+  .grid { display: grid; gap: 48px; flex: 1; min-height: 0; margin-top: 44px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 22px; padding: 32px 36px; }
+  .card p { font-size: 27px; }
+  ul.clean { list-style: none; }
+  ul.clean li { padding-left: 46px; position: relative; margin-bottom: 22px; }
+  ul.clean li::before { content: ""; position: absolute; left: 0; top: 14px; width: 22px; height: 22px; border-radius: 6px; background: var(--hot); }
+  ul.clean.teal li::before { background: var(--teal); }
+  .num { display: inline-flex; width: 54px; height: 54px; border-radius: 50%; align-items: center; justify-content: center;
+         background: var(--hot); color: #0b0f17; font-weight: 800; font-size: 28px; flex: none; }
+  .step { display: flex; gap: 22px; align-items: flex-start; margin-bottom: 30px; }
+  .step b { display: block; font-size: 31px; margin-bottom: 4px; }
+  .step span { font-size: 26px; line-height: 1.35; color: var(--muted); }
+  .stat { margin-bottom: 34px; }
+  .stat .big { font-size: 84px; font-weight: 800; line-height: 1; letter-spacing: -0.02em; }
+  .stat .lbl { font-size: 27px; color: var(--muted); margin-top: 8px; line-height: 1.3; }
+  .caption { font-size: 22px; color: var(--muted); margin-top: 14px; line-height: 1.35; }
+  .pill { display: inline-block; padding: 8px 18px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel);
+          font-size: 22px; color: var(--muted); margin-right: 10px; }
+  a { color: var(--teal); text-decoration: none; }
+  ul.clean.big li { font-size: 35px; margin-bottom: 34px; }
+  ul.clean.big li::before { top: 16px; width: 24px; height: 24px; }
+</style>
+</head>
+<body>
+
+<!-- 1 · Title -->
+<section class="slide" style="justify-content:center;">
+  <img src="img/map.png" alt="Mongolia air temperature trend map" class="shot"
+       style="position:absolute; right:72px; top:200px; width:820px; opacity:0.95; border-radius:24px;">
+  <div style="position:relative; max-width:900px;">
+    <div class="kicker">NASA Space Apps Challenge 2026</div>
+    <p class="muted" style="font-size:30px; margin-top:12px;">Challenge: <b style="color:var(--text)">Be An Earth System Trend Detective!</b></p>
+    <h1 style="margin-top:48px; font-size:100px;">Earth System<br>Trend <span class="hot">Detective</span></h1>
+    <p style="font-size:40px; margin-top:36px; line-height:1.3;">What is changing, where, by how much,<br>and is it <span class="hot">really</span> changing?</p>
+    <div style="margin-top:64px; font-size:30px; line-height:1.6;">
+      <div><span class="muted">Team</span> <b>Florensiza</b></div>
+      <div><span class="muted">Member</span> <b>Bishrel</b></div>
+      <div><span class="muted">Local event</span> <b>Ulaanbaatar, Mongolia</b></div>
+    </div>
+  </div>
+  <div class="pagenum">1 / 7</div>
+</section>
+
+<!-- 2 · The case -->
+<section class="slide">
+  <div class="kicker">The case</div>
+  <h2>Is Mongolia's climate really changing?<br><span class="muted" style="font-weight:700;">Finding out is harder than it sounds.</span></h2>
+  <div class="grid" style="grid-template-columns: 1fr 1fr;">
+    <div class="card">
+      <h3 class="hot" style="font-size:40px;">Why it's hard</h3>
+      <ul class="clean big" style="margin-top:26px;">
+        <li>Hundreds of Earth variables. <b>Which ones</b> are changing?</li>
+        <li>One process can push a variable <b>up in one region and down in another</b>.</li>
+        <li>A few warm years can look like a trend. Is it <b>statistically significant</b>, or chance?</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 class="teal" style="font-size:40px;">Why it matters in Mongolia</h3>
+      <ul class="clean teal big" style="margin-top:26px;">
+        <li><b>Dzud</b>: harsh winters after dry summers can kill millions of livestock.</li>
+        <li><b>Desertification</b> and dust storms in the Gobi.</li>
+        <li><b>Permafrost thaw</b> in the north.</li>
+      </ul>
+      <p class="muted" style="font-size:30px; margin-top:14px;">Herders, students and cities need evidence, not guesses.</p>
+    </div>
+  </div>
+  <p style="margin-top:36px; font-size:28px;"><span class="muted">Built for:</span> high-school and university students, and curious citizens. No coding needed.</p>
+  <div class="brand">Earth System Trend Detective · Team Florensiza</div><div class="pagenum">2 / 7</div>
+</section>
+
+<!-- 3 · How it works -->
+<section class="slide">
+  <div class="kicker">How it works</div>
+  <h2>Pick a variable. Pick a place. Get a verdict.</h2>
+  <div class="grid" style="grid-template-columns: 1.32fr 1fr; align-items:start;">
+    <div>
+      <img src="img/app.png" class="shot" style="width:100%;" alt="The app showing mission 1, Is Mongolia warming?">
+      <div class="caption">The real app: demo mission 1, "Is Mongolia warming?", with a plain-language verdict.</div>
+    </div>
+    <div style="padding-top:6px;">
+      <div class="step"><div class="num">1</div><div><b>What?</b><span>14 NASA variables, from temperature and frost days to soil moisture, snow, wind and sunlight. Each with a simple definition.</span></div></div>
+      <div class="step"><div class="num">2</div><div><b>Where?</b><span>Any point on Earth, 5 Mongolian regions, or all of Mongolia (587 grid cells).</span></div></div>
+      <div class="step"><div class="num">3</div><div><b>When?</b><span>Whole year or one season, any years from 1981 to 2025.</span></div></div>
+      <div class="step"><div class="num">4</div><div><b>Is it real?</b><span>t-test with 95% confidence interval, Mann-Kendall test and Sen's slope. "Significant" only when both tests agree.</span></div></div>
+      <p style="font-size:26px; margin-top:6px;"><span class="pill">6 guided missions</span><span class="pill">Compare 2 places</span><span class="pill">CSV download</span></p>
+    </div>
+  </div>
+  <div class="brand">Earth System Trend Detective · Team Florensiza</div><div class="pagenum">3 / 7</div>
+</section>
+
+<!-- 4 · What and where -->
+<section class="slide">
+  <div class="kicker">Detective tools</div>
+  <h2>See <span class="hot">where</span> it is changing, and <span class="teal">what</span> is changing</h2>
+  <div class="grid" style="grid-template-columns: 1.15fr 1fr; align-items:center;">
+    <div>
+      <img src="img/map.png" class="shot" style="width:100%;" alt="Trend map of Mongolia">
+      <div class="caption" style="font-size:26px;"><b style="color:var(--text)">Map:</b> air temperature trend in each of 587 NASA grid cells, 1981-2025.
+        Dots mark significant trends (Mann-Kendall p &lt; 0.05). Warming is strongest in the south-west.</div>
+    </div>
+    <div>
+      <img src="img/scan.png" class="shot" style="width:100%;" alt="All variables ranked by evidence for the South Gobi">
+      <div class="caption" style="font-size:26px;"><b style="color:var(--text)">Scanner:</b> all 14 variables at one place, ranked by evidence.
+        South Gobi: humidity rising; wind and sunlight falling.</div>
+    </div>
+  </div>
+  <div class="brand">Earth System Trend Detective · Team Florensiza</div><div class="pagenum">4 / 7</div>
+</section>
+
+<!-- 5 · NASA data -->
+<section class="slide">
+  <div class="kicker">Powered by NASA open data</div>
+  <h2>Real NASA data, real statistics, honest answers</h2>
+  <div class="grid" style="grid-template-columns: 1fr 1.15fr; align-items:start;">
+    <div style="display:flex; flex-direction:column; gap:22px;">
+      <div class="card"><h3 class="hot">NASA POWER <span class="muted" style="font-size:24px; font-weight:600;">· Langley Research Center</span></h3>
+        <p>Monthly and yearly data, 1981-2025, for single points and a grid over Mongolia.</p></div>
+      <div class="card"><h3 class="gold">MERRA-2 <span class="muted" style="font-size:24px; font-weight:600;">· NASA GMAO model</span></h3>
+        <p>Temperature, frost days, rain, humidity, evaporation, soil moisture, snow, wind.</p></div>
+      <div class="card"><h3 class="teal">CERES <span class="muted" style="font-size:24px; font-weight:600;">· NASA satellites</span></h3>
+        <p>Sunlight reaching the ground and cloud cover.</p></div>
+    </div>
+    <div>
+      <img src="img/investigate_chart.png" class="shot" style="width:100%;" alt="Trend chart with confidence band">
+      <div class="caption">Mongolia-average air temperature with its trend line and 95% confidence band.</div>
+      <ul class="clean teal" style="margin-top:26px;">
+        <li style="font-size:25px; margin-bottom:12px;">Never invents data: a real NASA snapshot ships with the app for slow Wi-Fi.</li>
+        <li style="font-size:25px; margin-bottom:12px;">Warns about data-source changes and correlated years.</li>
+        <li style="font-size:25px; margin-bottom:12px;">20 automated tests check the statistics.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="brand">Earth System Trend Detective · Team Florensiza</div><div class="pagenum">5 / 7</div>
+</section>
+
+<!-- 6 · Findings -->
+<section class="slide">
+  <div class="kicker">What we found · NASA POWER, 1981-2025</div>
+  <h2>Mongolia is warming, but not evenly</h2>
+  <div class="grid" style="grid-template-columns: 0.82fr 1.3fr; align-items:start;">
+    <div style="padding-top:8px;">
+      <div class="stat"><div class="big hot">+0.18 °C</div><div class="lbl">per decade, Mongolia average.<br>Significant (Mann-Kendall p = 0.005).</div></div>
+      <div class="stat"><div class="big hot">62%</div><div class="lbl">of Mongolia's area is warming significantly.<br>0% is cooling significantly.</div></div>
+      <div class="stat"><div class="big teal">-0.04 m/s</div><div class="lbl">per decade: winds are slowing<br>across Mongolia (significant).</div></div>
+    </div>
+    <div>
+      <img src="img/seasons.png" class="shot" style="width:100%;" alt="Temperature trend by season at five Mongolian sites">
+      <div class="caption"><b style="color:var(--text)">Seasons tell different stories:</b> summers warm significantly at 3 of 5 sites;
+        winters lean colder everywhere, but not significantly.</div>
+      <div class="card" style="margin-top:26px; padding:24px 30px;">
+        <p style="font-size:26px;"><b>Opposite trends:</b> Arctic winters warmed <span class="hot"><b>+1.39 °C</b></span> per decade (significant)
+          while Ulaanbaatar winters lean <span class="cool"><b>-0.24 °C</b></span> (not significant).</p>
+      </div>
+    </div>
+  </div>
+  <div class="brand">Earth System Trend Detective · Team Florensiza</div><div class="pagenum">6 / 7</div>
+</section>
+
+<!-- 7 · Future -->
+<section class="slide">
+  <div class="kicker">What's next</div>
+  <h2>Every student can be a<br>climate trend detective</h2>
+  <div class="grid" style="grid-template-columns: 1.1fr 1fr; align-items:center;">
+    <ul class="clean big" style="margin-top:10px;">
+      <li><b>Mongolian-language version</b> for schools and herder communities.</li>
+      <li><b>More NASA data:</b> GLDAS soil water and streamflow, MODIS vegetation greenness.</li>
+      <li><b>Seasonal trend maps</b> and more classroom missions.</li>
+      <li><b>Smarter tests</b> that correct for year-to-year memory.</li>
+    </ul>
+    <div class="card" style="padding:40px 44px;">
+      <h3 style="font-size:40px;">Try it</h3>
+      <!--APP_LINK-->
+      <p style="font-size:27px; margin-top:14px;"><span class="muted">Code:</span><br><a href="https://github.com/SigmabishrelXx/earth-system-trend-detective">github.com/SigmabishrelXx/earth-system-trend-detective</a></p>
+      <p style="font-size:26px; margin-top:22px;" class="muted">Teachers can share a ready-made mission: add <b style="color:var(--text)">?mission=3</b> to the app link.</p>
+      <p style="font-size:26px; margin-top:14px;" class="muted">Open source, MIT License. Free for any classroom.</p>
+    </div>
+  </div>
+  <p class="muted" style="font-size:20px; line-height:1.45; margin-top:24px; max-width:1500px;">
+    Data: NASA Langley Research Center (LaRC) POWER Project. Starting code: kdmayer/nasa-power-api (MIT). NASA does not endorse this project.<br>
+    AI use: the app's code and these slides were made with help from Claude Code (an AI assistant); every number comes from NASA data, computed by the app.
+  </p>
+  <div class="pagenum">7 / 7</div>
+</section>
+
+</body>
+</html>

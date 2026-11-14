@@ -10,6 +10,8 @@ instant and reliable on slow Wi-Fi. Re-run any time to refresh:
     python3 scripts/build_bundled_data.py            # everything
     python3 scripts/build_bundled_data.py points     # preset locations only
     python3 scripts/build_bundled_data.py grid       # Mongolia grid only
+
+AI disclosure: written with help from Claude Code (Anthropic's AI coding assistant). See README, "Use of AI".
 """
 
 from __future__ import annotations

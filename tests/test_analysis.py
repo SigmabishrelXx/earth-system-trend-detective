@@ -1,4 +1,7 @@
-"""Run with:  python3 -m unittest discover -s tests -v"""
+"""Run with:  python3 -m unittest discover -s tests -v
+
+AI disclosure: written with help from Claude Code (Anthropic's AI coding assistant). See README, "Use of AI".
+"""
 
 import math
 import sys

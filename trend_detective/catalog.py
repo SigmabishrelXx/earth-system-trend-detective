@@ -2,6 +2,8 @@
 
 Everything a student sees about a variable (name, unit, plain-language definition,
 data source and why it matters) lives here so the app and the docs stay consistent.
+
+AI disclosure: written with help from Claude Code (Anthropic's AI coding assistant). See README, "Use of AI".
 """
 
 from __future__ import annotations

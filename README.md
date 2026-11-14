@@ -9,6 +9,7 @@ and find out **what is changing, where it is changing, how much it is changing, 
 statistically significant.**
 
 **Live app:** _add your Streamlit Community Cloud link here after deploying_
+**Demo slides (7):** [demo/Earth_System_Trend_Detective_slides.pdf](demo/Earth_System_Trend_Detective_slides.pdf)
 
 ---
 
@@ -27,7 +28,8 @@ statistically significant.**
 
 - **Seasons:** winter, spring, summer or autumn, because a yearly average can hide opposite seasonal trends.
 - **Six guided demo missions** (for example *Summer vs winter in Ulaanbaatar* and *Warm Arctic, cold Mongolia?*).
-  Each one sets up the app and asks the student questions. The app computes the answers.
+  Each one sets up the app and asks the student questions. The app computes the answers. Share a mission
+  directly by adding `?mission=1` ... `?mission=6` to the app link.
 - **"Years needed" hint:** when a trend is not significant, the app estimates how long a record would be needed
   if the trend and noise continued.
 - **Mongolia insights tab:** country-wide trends, a season-by-season temperature comparison for five Mongolian
@@ -85,6 +87,9 @@ trend_detective/data.py        NASA POWER access, bundled snapshot, seasons, Mon
 trend_detective/analysis.py    Linear trend + t-test + CI, Mann-Kendall, Sen's slope, grid trends
 scripts/build_bundled_data.py  Downloads the bundled NASA POWER snapshot
 tests/test_analysis.py         Unit tests
+demo/                          Demo slides (slides.html -> PDF), screenshots of the real app
+scripts/build_slides.py        Renders the slides PDF with headless Chrome
+scripts/capture_screenshots.py Captures the app screenshots used in the slides
 data/bundled/                  NASA POWER snapshot + Mongolia border
 main.py, src/power_api.py      Original daily-data downloader from kdmayer/nasa-power-api (kept as-is)
 ```
@@ -123,8 +128,10 @@ main.py, src/power_api.py      Original daily-data downloader from kdmayer/nasa-
 
 ### Use of AI
 
-This project was built with help from **Claude Code** (Anthropic's AI coding assistant). The AI reviewed the
-first version of the app, wrote most of the new code (statistics, data layer, map, missions), wrote the unit tests
-and documentation, and helped draft the submission text. The team chose the challenge, the questions and the
-Mongolian focus, checked the app and its results, and is responsible for the final submission. All data comes from
-NASA POWER; the AI did not generate any data, images or results.
+This project was built with help from **Claude Code** (Anthropic's AI coding assistant), which Space Apps calls
+"Super Intelligence (SI)". Bishrel (Team Florensiza) chose the challenge, the approach and the Mongolian focus and
+built the first version of the app. The AI then reviewed it, wrote most of the new code (statistics, data layer,
+map, missions), wrote the unit tests and documentation, made the demo slides from screenshots of the real app, and
+helped draft the submission text. Every code file starts with an AI disclosure note, and every AI-assisted commit
+carries a `Co-Authored-By: Claude` line. All data and every number come from NASA POWER and are computed by the
+app; the AI did not generate any data, images or results.
