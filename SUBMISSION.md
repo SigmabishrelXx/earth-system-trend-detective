@@ -145,16 +145,19 @@ no NASA logos or branding appear anywhere.
 
 ## NASA Data
 
-- **NASA POWER (Prediction Of Worldwide Energy Resources), NASA Langley Research Center.** Monthly and annual point
-  API and regional API, version 2, `RE` community, 1981-2025. https://power.larc.nasa.gov
-  - Used for every chart, test, map and average in the app.
-  - Variables (POWER codes): T2M, T2M_MAX, T2M_MIN, FROST_DAYS, PRECTOTCORR, RH2M, QV2M, EVLAND, GWETROOT, GWETTOP,
-    SNODP, WS2M, ALLSKY_SFC_SW_DWN, CLOUD_AMT.
-- **MERRA-2 (Modern-Era Retrospective analysis for Research and Applications, Version 2), NASA Global Modeling and
-  Assimilation Office**, delivered through POWER: temperature, frost days, precipitation (corrected with gauge and
-  satellite observations), humidity, evaporation, soil moisture, snow depth and wind.
-- **CERES (Clouds and the Earth's Radiant Energy System) SYN1deg** (2001 onward) and **GEWEX SRB** (1984-2000),
-  delivered through POWER: sunlight at the surface and cloud cover.
+The form asks for one "Link Text" and one "Link Url" per resource (click "Add New Link" for each).
+
+| Link Text | Link Url |
+| --- | --- |
+| NASA POWER (Prediction Of Worldwide Energy Resources), NASA Langley Research Center | https://power.larc.nasa.gov |
+| NASA POWER Monthly and Annual API (point and regional, 1981-2025, 14 variables) | https://power.larc.nasa.gov/docs/services/api/temporal/monthly/ |
+| NASA POWER data sources and methodology | https://power.larc.nasa.gov/docs/methodology/ |
+| MERRA-2 reanalysis, NASA Global Modeling and Assimilation Office (temperature, precipitation, humidity, soil moisture, snow, wind) | https://gmao.gsfc.nasa.gov/reanalysis/MERRA-2/ |
+| CERES (Clouds and the Earth's Radiant Energy System), NASA satellite data for sunlight and cloud cover | https://www.earthdata.nasa.gov/data/instruments/ceres |
+| GEWEX Surface Radiation Budget (SRB), NASA Langley (sunlight and cloud cover, 1984-2000) | https://gewex-srb.larc.nasa.gov |
+
+Variables used (POWER codes): T2M, T2M_MAX, T2M_MIN, FROST_DAYS, PRECTOTCORR, RH2M, QV2M, EVLAND, GWETROOT, GWETTOP,
+SNODP, WS2M, ALLSKY_SFC_SW_DWN, CLOUD_AMT.
 
 Data acknowledgement: "The data was obtained from the National Aeronautics and Space Administration (NASA) Langley
 Research Center (LaRC) Prediction of Worldwide Energy Resource (POWER) Project funded through the NASA Earth
@@ -162,26 +165,21 @@ Science/Applied Science Program."
 
 ## Space Agency Partner Data and Other References
 
-No Space Agency Partner data was used.
+No Space Agency Partner data was used. Other data, code, tools and references (same Link Text / Link Url format):
 
-Other data, code and tools:
-- Natural Earth 1:50m Admin 0 countries (public domain): Mongolia border. https://www.naturalearthdata.com
-- kdmayer/nasa-power-api by Kevin Mayer (MIT License): starting code. https://github.com/kdmayer/nasa-power-api
-- Streamlit, Plotly, pandas, NumPy, SciPy, Requests (open-source Python libraries).
-- Claude Code (Anthropic): AI coding assistant (see Use of SI).
-
-References:
-1. NASA POWER Project, NASA Langley Research Center. https://power.larc.nasa.gov
-2. Gelaro, R., et al. (2017). The Modern-Era Retrospective Analysis for Research and Applications, Version 2
-   (MERRA-2). *Journal of Climate*, 30(14), 5419-5454. https://doi.org/10.1175/JCLI-D-16-0758.1
-3. Mann, H. B. (1945). Nonparametric tests against trend. *Econometrica*, 13(3), 245-259.
-4. Kendall, M. G. (1975). *Rank Correlation Methods* (4th ed.). Charles Griffin, London.
-5. Sen, P. K. (1968). Estimates of the regression coefficient based on Kendall's tau. *Journal of the American
-   Statistical Association*, 63(324), 1379-1389.
-6. IPCC (2018). *Global Warming of 1.5 °C*. Chapter 1: Framing and Context (current warming rate of about 0.2 °C
-   per decade).
-7. NASA Space Apps Challenge 2026, "Be An Earth System Trend Detective!" challenge statement and resources.
-   https://www.spaceappschallenge.org/2026/challenges/earth-system-trend-detective/
+| Link Text | Link Url |
+| --- | --- |
+| Natural Earth 1:50m countries (public domain): Mongolia border | https://www.naturalearthdata.com |
+| kdmayer/nasa-power-api by Kevin Mayer (MIT License): starting code | https://github.com/kdmayer/nasa-power-api |
+| Streamlit (app framework) | https://streamlit.io |
+| Plotly (interactive charts) | https://plotly.com/python/ |
+| SciPy (statistics) | https://scipy.org |
+| Claude Code by Anthropic: AI coding assistant (see Use of SI) | https://www.anthropic.com/claude-code |
+| Gelaro et al. (2017), MERRA-2, Journal of Climate | https://doi.org/10.1175/JCLI-D-16-0758.1 |
+| Mann (1945), Nonparametric tests against trend, Econometrica | https://doi.org/10.2307/1907187 |
+| Sen (1968), Estimates of the regression coefficient based on Kendall's tau | https://doi.org/10.1080/01621459.1968.10480934 |
+| IPCC (2018), Global Warming of 1.5 °C, Chapter 1 (global warming rate) | https://www.ipcc.ch/sr15/chapter/chapter-1/ |
+| NASA Space Apps 2026 challenge: Be An Earth System Trend Detective! | https://www.spaceappschallenge.org/2026/challenges/earth-system-trend-detective/ |
 
 ## Tags (if the form asks for them)
 
