@@ -75,6 +75,11 @@ class Page:
         await self.settle()
         await asyncio.sleep(1.0)
 
+    async def guess(self, label="Going up"):
+        await self.js(f"(()=>{{const l=[...document.querySelectorAll('label')].find(x=>x.innerText.includes({json.dumps(label)})); if(l) l.click(); return !!l;}})()")
+        await asyncio.sleep(1.5)
+        await self.settle()
+
     async def rect(self, js_element):
         return await self.js(
             f"(()=>{{const e=({js_element}); if(!e) return null; const r=e.getBoundingClientRect();"
@@ -124,6 +129,7 @@ async def main():
             # 1. Full app view (viewport screenshot) - mission 1, Mongolia country average
             await p.cmd("Emulation.setDeviceMetricsOverride", width=1440, height=900, deviceScaleFactor=2, mobile=False)
             await p.goto(f"{BASE}/?mission=1")
+            await p.guess("Going up")
             await p.shot("01_app_mission1")
 
             # Tall viewport so whole sections fit without scrolling
@@ -145,6 +151,7 @@ async def main():
             # 5. Mission 3 compare (fresh visit so the link applies)
             await p.cmd("Emulation.setDeviceMetricsOverride", width=1440, height=3200, deviceScaleFactor=2, mobile=False)
             await p.goto(f"{BASE}/?mission=3")
+            await p.guess("Going down")
             await p.shot("05_compare_arctic", await p.rect(from_heading_to_chart("Compare:", 0)))
 
             # 6. What is changing scan for South Gobi (mission 5)

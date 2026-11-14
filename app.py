@@ -20,10 +20,10 @@ import streamlit as st
 from plotly.subplots import make_subplots
 
 from trend_detective import catalog as C
+from trend_detective.figures import BLUE, RED, anomaly_animation, compare_figure, map_figure, seasons_figure, trend_figure
 from trend_detective.analysis import (
     TrendResult,
     analyze,
-    confidence_band,
     format_num,
     format_p,
     grid_trends,
@@ -42,8 +42,6 @@ from trend_detective.data import (
 
 st.set_page_config(page_title="Earth System Trend Detective", page_icon="🔎", layout="wide")
 
-BLUE, RED, TEAL, GREY = "#2563eb", "#dc2626", "#0d9488", "#6b7280"
-PALETTES = {"warm": "RdBu_r", "cold": "RdBu", "wet": "BrBG", "neutral": "PuOr_r"}
 SEASON_WORD = {"Whole year": "", "Winter (Dec-Feb)": "winter", "Spring (Mar-May)": "spring",
                "Summer (Jun-Aug)": "summer", "Autumn (Sep-Nov)": "autumn"}
 GLOBAL_WARMING_PER_DECADE = 0.2  # IPCC SR1.5 (2018), Chapter 1: ~0.2 °C per decade
@@ -184,6 +182,12 @@ def cached_grid_trends(var: str, y0: int, y1: int) -> pd.DataFrame:
     return grid_trends(sub, y0, y1)
 
 
+@st.cache_data(show_spinner=False)
+def cached_animation(var: str):
+    g = cached_grid()
+    return anomaly_animation(g[(g["Variable"] == var) & g["InMongolia"]], var, cached_boundary())
+
+
 def resolve(name: str) -> dict:
     if name == C.MONGOLIA_REGION:
         return {"name": name, "short": "Mongolia (country average)", "kind": "region", "lat": None, "lon": None}
@@ -296,83 +300,6 @@ def metrics_row(r: TrendResult, unit: str, box=st, compact: bool = False) -> Non
 
 
 # --------------------------------------------------------------------------
-# Charts
-# --------------------------------------------------------------------------
-def trend_figure(df: pd.DataFrame, r: TrendResult, var: str, title: str) -> go.Figure:
-    unit = C.VARIABLES[var]["unit"]
-    years, lo, hi = confidence_band(df, r)
-    fit = r.intercept + r.slope * years
-    sen_line = np.median(df["Value"] - r.sen_slope * df["Year"]) + r.sen_slope * years
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=np.concatenate([years, years[::-1]]), y=np.concatenate([hi, lo[::-1]]),
-                             fill="toself", fillcolor="rgba(220,38,38,0.12)", line=dict(width=0),
-                             name="95% confidence band", hoverinfo="skip"))
-    fig.add_trace(go.Scatter(x=df["Year"], y=df["Value"], mode="lines+markers", name="Measured value",
-                             line=dict(color=BLUE, width=2), marker=dict(size=6),
-                             hovertemplate="%{x}: %{y:.3f} " + unit + "<extra></extra>"))
-    fig.add_trace(go.Scatter(x=years, y=fit, mode="lines", name="Linear trend",
-                             line=dict(color=RED, width=2.5),
-                             hovertemplate="Trend %{x}: %{y:.3f} " + unit + "<extra></extra>"))
-    fig.add_trace(go.Scatter(x=years, y=sen_line, mode="lines", name="Sen's slope", visible="legendonly",
-                             line=dict(color=GREY, width=2, dash="dot"),
-                             hovertemplate="Sen %{x}: %{y:.3f} " + unit + "<extra></extra>"))
-    fig.update_layout(title=title, xaxis_title="Year", yaxis_title=f"{C.VARIABLES[var]['label']} ({unit})",
-                      hovermode="x unified", height=440, margin=dict(l=10, r=10, t=60, b=10),
-                      legend=dict(orientation="h", yanchor="bottom", y=1.0, xanchor="right", x=1))
-    return fig
-
-
-def compare_figure(a: pd.DataFrame, ra: TrendResult, name_a: str, b: pd.DataFrame, rb: TrendResult,
-                   name_b: str, var: str) -> go.Figure:
-    unit = C.VARIABLES[var]["unit"]
-    fig = go.Figure()
-    for df, r, name, color in ((a, ra, name_a, BLUE), (b, rb, name_b, TEAL)):
-        base = df["Value"].mean()
-        fig.add_trace(go.Scatter(x=df["Year"], y=df["Value"] - base, mode="lines+markers", name=name,
-                                 line=dict(color=color, width=1.5), marker=dict(size=5), opacity=0.75,
-                                 hovertemplate="%{x}: %{y:+.3f} " + unit + "<extra>" + name + "</extra>"))
-        fit = r.intercept + r.slope * df["Year"] - base
-        fig.add_trace(go.Scatter(x=df["Year"], y=fit, mode="lines", name=f"{name} trend",
-                                 line=dict(color=color, width=3), hoverinfo="skip"))
-    fig.add_hline(y=0, line=dict(color=GREY, width=1, dash="dot"))
-    fig.update_layout(title="Both places on one chart (difference from each place's own average)",
-                      xaxis_title="Year", yaxis_title=f"Difference from average ({unit})", height=420,
-                      hovermode="x unified", margin=dict(l=10, r=10, t=60, b=10),
-                      legend=dict(orientation="h", yanchor="bottom", y=1.0, xanchor="right", x=1))
-    return fig
-
-
-def map_figure(tr: pd.DataFrame, var: str, boundary) -> go.Figure:
-    meta = C.VARIABLES[var]
-    unit = meta["unit"]
-    z = tr.pivot(index="Lat", columns="Lon", values="PerDecade").sort_index().sort_index(axis=1)
-    lim = float(np.nanpercentile(np.abs(tr["PerDecade"]), 98)) or 1e-6
-    fig = go.Figure(go.Heatmap(
-        x=z.columns, y=z.index, z=z.values, colorscale=PALETTES[meta["palette"]], zmid=0, zmin=-lim, zmax=lim,
-        colorbar=dict(title=dict(text=f"{unit}<br>per decade", side="right")),
-        hovertemplate="Lat %{y:.2f}°, Lon %{x:.2f}°<br>%{z:+.3f} " + unit + " per decade<extra></extra>",
-    ))
-    sig = tr[tr["PMK"] < 0.05]
-    fig.add_trace(go.Scatter(x=sig["Lon"], y=sig["Lat"], mode="markers", name="Significant (Mann-Kendall p < 0.05)",
-                             marker=dict(size=3, color="#111827"), hoverinfo="skip"))
-    for i, poly in enumerate(boundary):
-        ring = np.asarray(poly[0])
-        fig.add_trace(go.Scatter(x=ring[:, 0], y=ring[:, 1], mode="lines", line=dict(color="#94a3b8", width=2),
-                                 name="Mongolia border", showlegend=i == 0, hoverinfo="skip"))
-    sites = [(n.split(" (")[0], *C.LOCATIONS[n][:2]) for n in C.MONGOLIA_SITES]
-    fig.add_trace(go.Scatter(x=[s[2] for s in sites], y=[s[1] for s in sites], mode="markers+text",
-                             text=[s[0] for s in sites], textposition="top center", name="Preset locations",
-                             marker=dict(size=9, color="white", line=dict(color="#111827", width=2)),
-                             textfont=dict(size=12, color="white", shadow="0px 0px 3px black"), hoverinfo="text"))
-    fig.update_xaxes(title="Longitude (°E)", showgrid=False, range=[87.2, 120.4])
-    fig.update_yaxes(title="Latitude (°N)", showgrid=False, scaleanchor="x",
-                     scaleratio=1 / math.cos(math.radians(47)), range=[41.2, 52.6])
-    fig.update_layout(height=560, margin=dict(l=10, r=10, t=30, b=10), plot_bgcolor="rgba(0,0,0,0)",
-                      legend=dict(orientation="h", yanchor="bottom", y=1.0, xanchor="left", x=0))
-    return fig
-
-
-# --------------------------------------------------------------------------
 # Sidebar
 # --------------------------------------------------------------------------
 with st.sidebar:
@@ -430,11 +357,30 @@ UNIT = META["unit"]
 # --------------------------------------------------------------------------
 # Header
 # --------------------------------------------------------------------------
-st.title("🔎 Earth System Trend Detective")
-st.markdown(
-    "Pick a place and an Earth science variable measured by NASA satellites or produced by NASA models, "
-    "then find out **what is changing, where, by how much, and whether the change is statistically significant.**"
-)
+st.markdown("""
+<style>
+.hero { padding: 26px 30px 22px; border-radius: 20px; margin: 0 0 14px;
+        background: linear-gradient(135deg, rgba(255,107,74,0.20), rgba(45,212,191,0.10) 70%);
+        border: 1px solid rgba(148,163,184,0.25); }
+.hero-kicker { text-transform: uppercase; letter-spacing: .14em; font-size: .78rem; color: #ff8a70; font-weight: 700; }
+.hero-title { font-size: 2.7rem; font-weight: 800; line-height: 1.08; margin-top: 6px; }
+.hero-title span { color: #ff6b4a; }
+.hero-sub { margin-top: 10px; font-size: 1.07rem; opacity: .92; max-width: 980px; line-height: 1.5; }
+.chips span { display: inline-block; margin: 14px 8px 0 0; padding: 4px 13px; border-radius: 999px; font-size: .86rem;
+              border: 1px solid rgba(148,163,184,0.35); background: rgba(15,23,42,0.35); }
+[data-testid="stMetric"] { background: rgba(148,163,184,0.07); border: 1px solid rgba(148,163,184,0.20);
+                           border-radius: 14px; padding: 12px 16px; }
+[data-testid="stTab"] p { font-size: 1.04rem; font-weight: 600; }
+</style>
+<div class="hero">
+  <div class="hero-kicker">NASA Space Apps 2026 · Team Florensiza · Ulaanbaatar, Mongolia</div>
+  <div class="hero-title">🔎 Earth System <span>Trend Detective</span></div>
+  <div class="hero-sub">Pick a place and an Earth science variable from NASA satellites and models, then find out
+  <b>what is changing, where, by how much, and whether the change is statistically significant.</b></div>
+  <div class="chips"><span>🛰️ 14 NASA variables</span><span>🗺️ 587 Mongolian grid cells</span>
+  <span>📅 1981-2025</span><span>🧪 2 significance tests</span><span>🕵️ 6 guided missions</span></div>
+</div>
+""", unsafe_allow_html=True)
 
 mission = MISSIONS.get(st.session_state["mission"])
 if mission:
@@ -472,6 +418,21 @@ def render_investigate() -> None:
 
     r = analyze(df)
     st.subheader(f"{what_phrase(VAR, season_eff)} · {LOC['short']}")
+    if MISSIONS.get(st.session_state["mission"]):
+        guess_key = f"guess|{st.session_state['mission']}|{VAR}|{season_eff}|{LOC['name']}|{YEARS}"
+        guess = st.radio("🔮 **Detective's guess:** before you see the evidence, what do you predict?",
+                         ["⬆️ Going up", "⬇️ Going down", "➖ No real trend"], index=None, horizontal=True, key=guess_key)
+        if guess is None:
+            st.caption("Make your guess to reveal the evidence. (Pick 'Explore on my own' in the sidebar to skip guessing.)")
+            return
+        truth = ("⬆️ Going up" if r.slope > 0 else "⬇️ Going down") if r.verdict == "significant" else "➖ No real trend"
+        if guess == truth:
+            st.success(f"🎯 **Good detective work!** You said *{guess[2:].strip()}* and the evidence agrees.")
+        elif r.verdict == "mixed" and guess != "➖ No real trend" and guess[0] == ("⬆" if r.slope > 0 else "⬇"):
+            st.info(f"🤏 **Close!** The data does lean {r.direction}, but the two tests disagree, so it is not proven yet.")
+        else:
+            st.warning(f"🤔 **Not quite.** You said *{guess[2:].strip()}*, but the evidence says "
+                       f"*{truth[2:].strip().lower()}*. Look at the chart and the tests below to see why.")
     metrics_row(r, UNIT)
     show_verdict(r, VAR, season_eff, LOC["short"])
     st.markdown(f"**Why it matters:** {META['why']}")
@@ -640,18 +601,71 @@ def area_share(tr: pd.DataFrame, mask: pd.Series) -> float:
     return float(w[mask].sum() / w.sum() * 100) if len(tr) else 0.0
 
 
+def pick_investigate(lat: float, lon: float) -> None:
+    st.session_state["loc"] = C.CUSTOM
+    st.session_state["custom_lat"] = round(float(lat), 4)
+    st.session_state["custom_lon"] = round(float(lon), 4)
+
+
+def render_cell_story(var: str, lat: float, lon: float) -> None:
+    """Inline time series + verdict for one clicked grid cell (bundled yearly data, no download needed)."""
+    meta = C.VARIABLES[var]
+    g = cached_grid()
+    cell = g[(g["Variable"] == var) & (np.isclose(g["Lat"], lat)) & (np.isclose(g["Lon"], lon))]
+    cell = cell[(cell["Year"] >= YEARS[0]) & (cell["Year"] <= YEARS[1])][["Year", "Value"]].sort_values("Year")
+    if len(cell) < 5:
+        st.info("Not enough years for this cell.")
+        return
+    r = analyze(cell.reset_index(drop=True))
+    place = f"{lat:.2f}°N, {lon:.2f}°E"
+    st.markdown(f"#### 📍 The story of one grid cell: {place}")
+    left, right = st.columns([1, 2])
+    with left:
+        st.metric("Change per decade", format_num(r.per_decade, meta["unit"]))
+        st.metric("Mann-Kendall p", format_p(r.mk.p))
+        st.metric(f"Total change ({r.end - r.start} yrs)", format_num(r.total_change, meta["unit"]))
+        st.button("🔎 Investigate this spot in full", on_click=pick_investigate, args=(lat, lon), width="stretch",
+                  help="Loads every variable and season for this point live from NASA, then open the Investigate tab.")
+    with right:
+        st.plotly_chart(trend_figure(cell, r, var, f"{meta['label']} at {place}", height=330), width="stretch")
+    show_verdict(r, var, "Whole year", place)
+    if st.session_state.get("loc") == C.CUSTOM and abs(st.session_state.get("custom_lat", 0) - lat) < 1e-3 \
+            and abs(st.session_state.get("custom_lon", 0) - lon) < 1e-3:
+        st.success("✅ Loaded. Open the **🔎 Investigate** tab to explore this spot with every variable and season.")
+
+
 def render_map() -> None:
     if not HAS_GRID:
         st.info("The Mongolia map needs the bundled grid file. Run `python3 scripts/build_bundled_data.py grid`.")
         return
     default = VAR if VAR in C.MAP_VARIABLES else "T2M"
-    var = st.selectbox("Variable to map", C.MAP_VARIABLES, index=C.MAP_VARIABLES.index(default),
-                       format_func=C.var_title)
+    c_var, c_view = st.columns([2, 3])
+    var = c_var.selectbox("Variable to map", C.MAP_VARIABLES, index=C.MAP_VARIABLES.index(default),
+                          format_func=C.var_title)
+    view = c_view.radio("View", ["📈 Trend map (click a cell)", "▶️ Watch it change, year by year"],
+                        horizontal=True, key="map_view")
     meta = C.VARIABLES[var]
     unit = meta["unit"]
+
+    if view.startswith("▶️"):
+        st.markdown(f"Each frame shows one year's **{meta['label'].lower()}** compared with the 1981-2010 "
+                    "average of the same grid cell. Press **▶ Play**, or drag the year slider.")
+        g = cached_grid()
+        gv = g[(g["Variable"] == var) & g["InMongolia"]]
+        st.plotly_chart(cached_animation(var), width="stretch", key=f"anim_{var}")
+        nat = cached_country_series(var)
+        if len(nat) >= 5 and not gv.empty:
+            base = nat[(nat["Year"] >= 1981) & (nat["Year"] <= 2010)]["Value"].mean()
+            top = (nat.assign(A=nat["Value"] - base).nlargest(3, "A"))
+            low = (nat.assign(A=nat["Value"] - base).nsmallest(3, "A"))
+            st.caption(f"Highest years for the Mongolia average: "
+                       + ", ".join(f"{int(y)} ({a:+.2f} {unit})" for y, a in zip(top["Year"], top["A"]))
+                       + ". Lowest: " + ", ".join(f"{int(y)} ({a:+.2f} {unit})" for y, a in zip(low["Year"], low["A"])) + ".")
+        return
+
     st.markdown(f"Trend per decade in **{meta['label'].lower()}** for every NASA POWER grid cell inside Mongolia "
-                f"(about 50 km apart), yearly values {YEARS[0]}-{YEARS[1]}. Dots mark cells where the "
-                "Mann-Kendall test finds a significant trend.")
+                f"(about 50 km apart), yearly values {YEARS[0]}-{YEARS[1]}. Dots mark significant trends "
+                "(Mann-Kendall). **Hover** any cell for its numbers and **click** it to see its full story below.")
     with st.spinner("Testing every grid cell..."):
         tr = cached_grid_trends(var, YEARS[0], YEARS[1])
     if tr.empty:
@@ -668,7 +682,18 @@ def render_map() -> None:
     c2.metric("Area with significant increase", f"{area_share(tr, sig & (tr['PerDecade'] > 0)):.0f}%")
     c3.metric("Area with significant decrease", f"{area_share(tr, sig & (tr['PerDecade'] < 0)):.0f}%")
     c4.metric("Grid cells tested", f"{len(tr)}")
-    st.plotly_chart(map_figure(tr, var, cached_boundary()), width="stretch")
+
+    # The map's last click is already in session state at the start of this run, so the chosen cell can be
+    # highlighted in the same run (no second rerun needed).
+    state = st.session_state.get("trend_map") or {}
+    points = (state.get("selection") or {}).get("points") or []
+    if points:
+        px, py = float(points[-1]["x"]), float(points[-1]["y"])
+        best = tr.loc[((tr["Lon"] - px) ** 2 + (tr["Lat"] - py) ** 2).idxmin()]
+        st.session_state["map_pick"] = (float(best.Lat), float(best.Lon))
+    picked = st.session_state.get("map_pick")
+    st.plotly_chart(map_figure(tr, var, cached_boundary(), picked=picked), width="stretch",
+                    key="trend_map", on_select="rerun", selection_mode="points")
     fastest = tr.loc[tr["PerDecade"].idxmax()]
     slowest = tr.loc[tr["PerDecade"].idxmin()]
     st.caption(
@@ -677,6 +702,11 @@ def render_map() -> None:
         "Grid: NASA POWER native resolution (0.5° × 0.625° for MERRA-2 variables, 1° for solar). "
         "Border: Natural Earth (public domain)."
     )
+    if picked:
+        st.divider()
+        render_cell_story(var, picked[0], picked[1])
+    else:
+        st.info("👆 Click any cell on the map to see how that place changed, year by year.")
 
 
 # --------------------------------------------------------------------------
@@ -733,19 +763,7 @@ def render_mongolia() -> None:
                 rows.append((site.split(" (")[0], SEASON_WORD[season], r.per_decade, r.verdict == "significant"))
     if rows:
         sdf = pd.DataFrame(rows, columns=["Site", "Season", "PerDecade", "Significant"])
-        fig = go.Figure()
-        colors = {"winter": "#3b82f6", "spring": "#22c55e", "summer": "#ef4444", "autumn": "#f59e0b"}
-        for season, color in colors.items():
-            d = sdf[sdf["Season"] == season]
-            fig.add_trace(go.Bar(
-                x=d["Site"], y=d["PerDecade"], name=season.capitalize(), marker_color=color,
-                marker_opacity=[1.0 if s else 0.35 for s in d["Significant"]],
-                marker_line=dict(color=["#111827" if s else "rgba(0,0,0,0)" for s in d["Significant"]], width=1.5),
-                hovertemplate="%{x}, " + season + ": %{y:+.2f} °C per decade<extra></extra>"))
-        fig.add_hline(y=0, line=dict(color=GREY, width=1))
-        fig.update_layout(barmode="group", height=400, yaxis_title="Air temperature change (°C per decade)",
-                          margin=dict(l=10, r=10, t=30, b=10),
-                          legend=dict(orientation="h", yanchor="bottom", y=1.0, xanchor="right", x=1))
+        fig = seasons_figure(sdf)
         st.plotly_chart(fig, width="stretch")
         st.caption("Solid bars with an outline are significant (both tests agree); faded bars are not.")
         summer = sdf[sdf["Season"] == "summer"]

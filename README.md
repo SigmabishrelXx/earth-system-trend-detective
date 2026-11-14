@@ -9,7 +9,7 @@ and find out **what is changing, where it is changing, how much it is changing, 
 statistically significant.**
 
 **Live app:** _add your Streamlit Community Cloud link here after deploying_
-**Demo slides (7):** [demo/Earth_System_Trend_Detective_slides.pdf](demo/Earth_System_Trend_Detective_slides.pdf)
+**Interactive demo slides (7):** https://sigmabishrelxx.github.io/earth-system-trend-detective/ (live charts; PDF version: [demo/Earth_System_Trend_Detective_slides.pdf](demo/Earth_System_Trend_Detective_slides.pdf))
 
 ---
 
@@ -21,12 +21,13 @@ statistically significant.**
 | Acquire data for a region | 8 preset locations (5 in Mongolia, 3 global contrasts), any custom latitude/longitude worldwide (fetched live), and a **country average for all of Mongolia** built from every NASA POWER grid cell inside the border. |
 | Generate and visualise a time series | Interactive Plotly charts of yearly or seasonal values from 1981 to 2025, with the trend line, its 95% confidence band and Sen's slope. |
 | Rate of change and significance testing | Least-squares trend with a **t-test** and **95% confidence interval**, the **Mann-Kendall test** (with tie correction) and **Sen's slope**. A trend is called *significant* only when both tests agree at the 5% level. |
-| Where is it changing? | The **map tab** computes a trend for each of the 587 grid cells inside Mongolia and dots the cells with significant trends. |
+| Where is it changing? | The **map tab** computes a trend for each of the 587 grid cells inside Mongolia and dots the cells with significant trends. **Click any cell** to see its own time series and verdict, or press **Play** to watch Mongolia change year by year (difference from the 1981-2010 average). |
 | One variable, opposite trends in two regions | **Compare** mode puts two places side by side and flags when their trends run in opposite directions. |
 
 ### Also included
 
 - **Seasons:** winter, spring, summer or autumn, because a yearly average can hide opposite seasonal trends.
+- **"Guess first" game:** in a mission, students predict the trend before the evidence appears, then get feedback.
 - **Six guided demo missions** (for example *Summer vs winter in Ulaanbaatar* and *Warm Arctic, cold Mongolia?*).
   Each one sets up the app and asks the student questions. The app computes the answers. Share a mission
   directly by adding `?mission=1` ... `?mission=6` to the app link.
@@ -85,10 +86,14 @@ app.py                         Streamlit user interface (tabs, charts, missions)
 trend_detective/catalog.py     Variables, definitions, locations, seasons
 trend_detective/data.py        NASA POWER access, bundled snapshot, seasons, Mongolia grid + border mask
 trend_detective/analysis.py    Linear trend + t-test + CI, Mann-Kendall, Sen's slope, grid trends
+trend_detective/figures.py     Plotly charts shared by the app and the web slides (map, animation, trends)
 scripts/build_bundled_data.py  Downloads the bundled NASA POWER snapshot
 tests/test_analysis.py         Unit tests
 demo/                          Demo slides (slides.html -> PDF), screenshots of the real app
 scripts/build_slides.py        Renders the slides PDF with headless Chrome
+scripts/build_web_slides.py    Builds the interactive web slides in docs/ (GitHub Pages)
+docs/                          Interactive web slides (index.html + Plotly.js), served by GitHub Pages
+.streamlit/config.toml         Dark theme for the app
 scripts/capture_screenshots.py Captures the app screenshots used in the slides
 data/bundled/                  NASA POWER snapshot + Mongolia border
 main.py, src/power_api.py      Original daily-data downloader from kdmayer/nasa-power-api (kept as-is)

@@ -25,9 +25,11 @@ decade (significant), with significant warming across 62% of the country, and su
 
 ## Link to Project Demo
 
-https://github.com/SigmabishrelXx/earth-system-trend-detective/blob/main/demo/Earth_System_Trend_Detective_slides.pdf
+https://sigmabishrelxx.github.io/earth-system-trend-detective/
 
-(7-slide deck, PDF, publicly viewable on GitHub without login.)
+(Interactive 7-slide web presentation with live charts, publicly viewable without login. Use the arrow keys or the
+buttons to move. A PDF version is linked at the top of the page and is also at
+https://github.com/SigmabishrelXx/earth-system-trend-detective/blob/main/demo/Earth_System_Trend_Detective_slides.pdf)
 
 ## Link to Final Project
 
@@ -51,7 +53,8 @@ Trend Detective does all of this in one browser page, with no installation or lo
    Eastern Steppe), three global contrasts (Amazon, Sahel, Arctic), any latitude/longitude on Earth (fetched live),
    or the **whole of Mongolia** as an area-weighted average of every NASA POWER grid cell inside the border.
    The **map** tab computes a trend for each of the 587 grid cells inside Mongolia and marks where the trend is
-   significant.
+   significant. Clicking any cell shows that place's own time series and verdict, and a **Play** button animates
+   Mongolia year by year (each year compared with the 1981-2010 average).
 3. **See the time series (how much).** Interactive charts of yearly or seasonal values (winter, spring, summer,
    autumn) with the trend line, its 95% confidence band and Sen's slope. The rate of change is shown per decade and
    over the whole period. Data can be downloaded as CSV.
@@ -64,7 +67,8 @@ Trend Detective does all of this in one browser page, with no installation or lo
 
 **Guided missions.** Six demo missions set up the app and ask questions, for example *Summer vs winter in
 Ulaanbaatar*, *Warm Arctic, cold Mongolia?*, *Is northern Mongolia drying out?* and *Are Gobi winds slowing down?*
-The app computes the answers from the data, so students practise reading evidence instead of being told results.
+Before the evidence appears, students make a guess ("going up", "going down" or "no real trend") and get feedback,
+so they practise reading evidence instead of being told results.
 Teachers can share a mission directly by adding `?mission=1` to `?mission=6` to the app link.
 
 **What I found (NASA POWER, 1981-2025).**
@@ -110,7 +114,8 @@ Yes. I chose the challenge, the approach (a NASA POWER trend dashboard with sign
 focus, and built a first working version of the app. I then used **Claude Code**, Anthropic's AI coding assistant, to
 review that version and to write most of the new code: the Mann-Kendall test, confidence intervals and Sen's slope,
 the data loading and bundled NASA snapshot, the Mongolia map and country average, seasons, compare mode and the
-guided missions. It also wrote the unit tests and README, made the demo slides from screenshots of the real app, and
+guided missions, the clickable map, the year-by-year animation and the guessing game. It also wrote the unit tests
+and README, built the interactive web slides and the PDF slides from the app's real charts and screenshots, and
 helped draft this text. I checked the app and its results and am responsible for the final project.
 
 Where SI was used is marked in the project itself: a note at the top of each code file, a "Use of AI" section in
