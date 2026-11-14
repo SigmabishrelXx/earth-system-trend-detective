@@ -375,6 +375,9 @@ st.markdown("""
 [data-testid="stMetric"] { background: rgba(148,163,184,0.07); border: 1px solid rgba(148,163,184,0.20);
                            border-radius: 14px; padding: 12px 16px; }
 [data-testid="stTab"] p { font-size: 1.04rem; font-weight: 600; }
+/* hide Streamlit's Deploy button, the menu and hosting icons; keep the button that reopens the sidebar */
+[data-testid="stAppDeployButton"], [data-testid="stMainMenu"], [data-testid="stToolbarActions"] { display: none !important; }
+[data-testid="stHeader"] { background: transparent; }
 </style>
 <div class="hero">
   <div class="hero-kicker">NASA Space Apps 2026 · Team Florensiza · Ulaanbaatar, Mongolia</div>

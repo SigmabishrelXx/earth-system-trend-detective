@@ -153,9 +153,8 @@ PAGE = r"""<!doctype html>
   .hero .lead { margin:26px auto 0; }
   .hero .ctas { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-top:36px; }
   .frame-wrap { perspective:1600px; margin:70px auto 0; max-width:1180px; }
-  .frame { border-radius:30px; padding:22px; background:linear-gradient(160deg, #0b2545 0%, #1d5a9b 55%, #9cc4ea 100%);
-           box-shadow:0 50px 120px rgba(11,37,69,.28); transform-origin:center top; will-change:transform; }
-  .frame img { display:block; width:100%; border-radius:14px; }
+  .frame { border-radius:20px; padding:0; background:transparent; transform-origin:center top; will-change:transform; }
+  .frame img { display:block; width:100%; border-radius:20px; box-shadow:0 40px 100px rgba(11,37,69,.20), 0 0 0 1px rgba(15,23,42,.06); }
   .ribbon { display:flex; height:16px; border-radius:8px; overflow:hidden; margin:34px auto 0; max-width:1180px; }
   .ribbon i { flex:1; }
   .ribbon-cap { font-size:13px; color:var(--muted); margin-top:10px; }
@@ -208,13 +207,13 @@ PAGE = r"""<!doctype html>
   .steps .step h3 { font-size:clamp(26px, 2.6vw, 36px); }
   .steps .step p { color:var(--muted); font-size:18px; margin-top:14px; max-width:460px; }
   .sticky { position:sticky; top:110px; height:calc(100vh - 160px); display:flex; align-items:center; }
-  .shots { position:relative; width:100%; aspect-ratio:16/11; border-radius:24px; background:#0b0f17; overflow:hidden;
-           box-shadow:0 40px 100px rgba(11,37,69,.25); border:10px solid #0b2545; }
-  .shots img { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; background:#181818; opacity:0; transform:scale(1.04);
+  .shots { position:relative; width:100%; aspect-ratio:16/11; background:transparent; }
+  .shots img { position:absolute; inset:0; margin:auto; max-width:100%; max-height:100%; width:auto; height:auto; border-radius:18px;
+               box-shadow:0 30px 80px rgba(11,37,69,.20), 0 0 0 1px rgba(15,23,42,.06); opacity:0; transform:scale(1.04);
                transition:opacity .6s var(--ease), transform .8s var(--ease); }
   .shots img.on { opacity:1; transform:none; }
-  .dots { position:absolute; right:16px; bottom:14px; display:flex; gap:6px; z-index:2; }
-  .dots i { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,.35); transition:all .3s; }
+  .dots { position:absolute; left:50%; transform:translateX(-50%); bottom:-28px; display:flex; gap:6px; z-index:2; }
+  .dots i { width:8px; height:8px; border-radius:50%; background:rgba(15,23,42,.18); transition:all .3s; }
   .dots i.on { background:var(--hot2); width:22px; border-radius:5px; }
 
   /* explore */
