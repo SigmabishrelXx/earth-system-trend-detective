@@ -31,7 +31,8 @@ statistically significant.**
 - **"Guess first" game:** in a mission, students predict the trend before the evidence appears, then get feedback.
 - **Six guided demo missions** (for example *Summer vs winter in Ulaanbaatar* and *Svalbard vs Ulaanbaatar winters: test a debated idea*).
   Each one sets up the app and asks the student questions. The app computes the answers. Share a mission
-  directly by adding `?mission=1` ... `?mission=6` to the app link.
+  directly by adding `?mission=1` ... `?mission=6` to the app link. The missions also run in the live demo on the
+  project website (`…/#mission-1` ... `#mission-6`).
 - **"Years needed" hint:** when a trend is not significant, the app estimates how long a record would be needed
   if the trend and noise continued.
 - **Mongolia insights tab:** country-wide trends, a season-by-season temperature comparison for five Mongolian

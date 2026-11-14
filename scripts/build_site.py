@@ -103,7 +103,7 @@ USERS = [
      "mission": 6},
     {"id": "teacher", "icon": "🧑‍🏫", "name": "Teachers", "who": "Secondary schools and universities",
      "q": "How do I teach climate data in one lesson?",
-     "how": ["Share a ready-made mission link (…/?mission=3)", "Let students predict, then reveal the evidence", "Use the Learn tab's simple definitions"],
+     "how": ["Share a ready-made mission link (…/#mission-3)", "Let students predict, then reveal the evidence", "Use the Learn tab's simple definitions"],
      "mission": 3},
     {"id": "herder", "icon": "🐑", "name": "Herders and rural communities", "who": "Today through English-speaking extension workers, NGO staff and soum officials",
      "q": "Are winters, snow and pasture changing where we graze?",
@@ -120,6 +120,37 @@ STEPS = [
     {"t": "Choose where", "d": "Any point on Earth, five Mongolian regions, or all of Mongolia averaged from 587 grid cells. Click any cell on the map to see its own story.", "img": "map.png"},
     {"t": "Choose when", "d": "The whole year or one season, any years from 1981 to 2025. Seasons often tell different stories: Mongolian summers warm while winters don't.", "img": "seasons.png"},
     {"t": "Get a verdict, with its uncertainty shown", "d": "A t-test with a 95% confidence interval, the Mann-Kendall test and Sen's slope. The app calls a trend significant only when both tests agree, explains it in plain words, and flags its limits: data-source changes, correlated years and testing many things at once.", "img": "investigate.png"},
+]
+
+SITE_URL = "https://sigmabishrelxx.github.io/earth-system-trend-detective/"
+
+UB, GOBI, KHUV, SVAL, STEPPE = (C.slugify(n) for n in ("Ulaanbaatar (capital)", "South Gobi (Dalanzadgad)",
+                                                        "Lake Khuvsgul (northern taiga)", "Arctic (Svalbard, Norway)",
+                                                        "Eastern Steppe (Choibalsan)"))
+# what each mission loads in the live demo; "chips" are follow-up views; the app has the same six missions
+MISSION_CFG = [
+    {"loc": "MNG", "var": "T2M", "sea": "Whole year", "q": "Is Mongolia's average temperature really changing?",
+     "chips": [], "hint": "Then scroll down to Explore to see which parts of Mongolia warm fastest."},
+    {"loc": UB, "var": "T2M", "sea": "Summer (Jun-Aug)", "q": "Are Ulaanbaatar's summers getting warmer?",
+     "chips": [{"label": "Now try winter", "loc": UB, "var": "T2M", "sea": "Winter (Dec-Feb)"},
+               {"label": "Back to summer", "loc": UB, "var": "T2M", "sea": "Summer (Jun-Aug)"}],
+     "hint": "Does winter go the same way as summer?"},
+    {"loc": UB, "var": "T2M", "sea": "Winter (Dec-Feb)", "q": "Are Ulaanbaatar's winters warming like Svalbard's?",
+     "chips": [{"label": "Switch to Svalbard", "loc": SVAL, "var": "T2M", "sea": "Winter (Dec-Feb)"},
+               {"label": "Back to Ulaanbaatar", "loc": UB, "var": "T2M", "sea": "Winter (Dec-Feb)"}],
+     "hint": "Opposite directions? Is each one significant? The suggested link between them is debated: test it, don't assume it."},
+    {"loc": KHUV, "var": "GWETROOT", "sea": "Whole year", "q": "Is the root-zone soil drying out at Lake Khuvsgul?",
+     "chips": [{"label": "Switch to South Gobi", "loc": GOBI, "var": "GWETROOT", "sea": "Whole year"},
+               {"label": "Back to Lake Khuvsgul", "loc": KHUV, "var": "GWETROOT", "sea": "Whole year"}],
+     "hint": "Compare the two verdicts: which place has the stronger evidence?"},
+    {"loc": GOBI, "var": "WS2M", "sea": "Whole year", "q": "Is the wind in the South Gobi slowing down?",
+     "chips": [{"label": "Compare Lake Khuvsgul", "loc": KHUV, "var": "WS2M", "sea": "Whole year"},
+               {"label": "Back to South Gobi", "loc": GOBI, "var": "WS2M", "sea": "Whole year"}],
+     "hint": "Wind lifts the dust storms that reach Ulaanbaatar. Is the change the same everywhere?"},
+    {"loc": STEPPE, "var": "FROST_DAYS", "sea": "Whole year", "q": "Is the Eastern Steppe losing frost days?",
+     "chips": [{"label": "Compare Lake Khuvsgul", "loc": KHUV, "var": "FROST_DAYS", "sea": "Whole year"},
+               {"label": "Back to the Eastern Steppe", "loc": STEPPE, "var": "FROST_DAYS", "sea": "Whole year"}],
+     "hint": "A shorter record can hide a real trend: the full app lets you test 2000-2025 only."},
 ]
 
 MISSIONS = [
@@ -225,6 +256,25 @@ PAGE = r"""<!doctype html>
   .demo-verdict.ok { background:#e7f5ee; color:#14532d; } .demo-verdict.warn { background:#fdf3dc; color:#7a4a00; }
   .demo-verdict.info { background:#eaf0fb; color:#1e3a8a; } .demo-verdict b { color:inherit; }
   .demo-note { font-size:12.5px; color:var(--muted); min-height:16px; }
+  .demo-mission { background:#fdf2f4; border:1px solid #f3c9d2; border-radius:14px; padding:14px 16px; margin-bottom:14px; }
+  .demo-mission .mtop { display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:12px; font-weight:700;
+                        letter-spacing:.1em; text-transform:uppercase; color:var(--hot); }
+  .demo-mission .mtop button { font:600 12px var(--body); letter-spacing:0; text-transform:none; color:var(--muted); background:none; border:none; cursor:pointer; }
+  .demo-mission .mtop button:hover { color:var(--ink); }
+  .demo-mission .mq { font-family:var(--display); font-weight:700; font-size:19px; margin-top:6px; color:var(--ink); }
+  .demo-mission .guess { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:10px; font-size:14px; color:var(--muted); }
+  .demo-mission .guess button, .demo-mission .mchips button { font:500 14px var(--body); padding:7px 13px; border-radius:999px; border:1px solid #e8c4cc;
+                        background:#fff; color:var(--ink); cursor:pointer; transition:all .15s; }
+  .demo-mission .guess button:hover, .demo-mission .mchips button:hover { border-color:var(--hot); }
+  .demo-mission .guess button.on { background:var(--navy); color:#fff; border-color:var(--navy); }
+  .demo-mission .guess.done button:not(.on) { opacity:.45; }
+  .demo-mission .mfb { font-size:14px; margin-top:10px; color:var(--ink); }
+  .demo-mission .mfb:empty { display:none; }
+  .demo-mission .mchips { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; } .demo-mission .mchips:empty { display:none; }
+  .demo-mission .mchips button.on { background:#fde4e9; border-color:var(--hot); color:var(--hot); font-weight:600; }
+  .demo-mission .mhint { font-size:13px; color:var(--muted); margin-top:8px; }
+  #d-evidence { transition:filter .45s, opacity .45s; position:relative; }
+  #d-evidence.veiled { filter:blur(7px); opacity:.4; pointer-events:none; user-select:none; }
   @media (max-width: 960px) { .demo { grid-template-columns:1fr; } .demo-side { border-right:none; border-bottom:1px solid var(--line); }
     .demo-metrics { grid-template-columns:repeat(3, 1fr); } }
   @media (max-width: 560px) { .demo-metrics { grid-template-columns:repeat(2, 1fr); } .demo-main { padding:18px; } }
@@ -324,11 +374,12 @@ PAGE = r"""<!doctype html>
 
   /* missions */
   .missions { display:grid; grid-template-columns:repeat(3, 1fr); gap:18px; margin-top:44px; }
-  .mcard { background:#fff; border:1px solid var(--line); border-radius:20px; padding:24px; text-decoration:none; display:block; transition:all .25s var(--ease); }
+  .mcard { cursor:pointer; background:#fff; border:1px solid var(--line); border-radius:20px; padding:24px; text-decoration:none; display:block; transition:all .25s var(--ease); }
   .mcard:hover { transform:translateY(-4px); box-shadow:0 20px 50px rgba(110,25,40,.12); border-color:#dfc5c8; }
   .mcard .no { font-family:var(--display); font-weight:800; color:var(--hot); font-size:14px; letter-spacing:.12em; }
   .mcard h3 { margin-top:10px; font-size:21px; } .mcard p { color:var(--muted); font-size:15px; margin-top:8px; }
-  .mcard .go { margin-top:16px; font-size:14px; font-weight:650; color:var(--navy2); }
+  .mcard .go { margin-top:16px; font-size:14px; font-weight:650; color:var(--hot); }
+  .mcard .go2 { display:inline-block; margin-top:6px; font-size:13px; color:var(--muted); }
 
   /* conclusion + footer */
   .final { background:rgba(255,255,255,.6); border:1px solid var(--line); color:var(--ink); border-radius:36px; margin:0 20px; padding:90px 0; overflow:hidden; position:relative; }
@@ -382,11 +433,22 @@ PAGE = r"""<!doctype html>
     </aside>
     <div class="demo-main">
       <div class="demo-top"><span class="live">● Live</span> Computed in your browser from NASA POWER data, with the app's own statistics.</div>
+      <div class="demo-mission" id="d-mission" hidden>
+        <div class="mtop"><span id="dm-label"></span><button type="button" id="dm-exit" aria-label="Exit mission">✕ Exit mission</button></div>
+        <p class="mq" id="dm-q"></p>
+        <div class="guess" id="dm-guess"><span>🔮 Your guess first:</span>
+          <button type="button" data-g="up">⬆️ Going up</button><button type="button" data-g="down">⬇️ Going down</button><button type="button" data-g="none">➖ No real trend</button></div>
+        <div class="mfb" id="dm-fb"></div>
+        <div class="mchips" id="dm-chips"></div>
+        <p class="mhint" id="dm-hint"></p>
+      </div>
       <h3 id="d-title"></h3>
-      <div class="demo-metrics" id="d-metrics"></div>
-      <div class="demo-verdict" id="d-verdict"></div>
-      <div id="d-chart" style="height:300px;"></div>
-      <div class="demo-note" id="d-note"></div>
+      <div id="d-evidence">
+        <div class="demo-metrics" id="d-metrics"></div>
+        <div class="demo-verdict" id="d-verdict"></div>
+        <div id="d-chart" style="height:300px;"></div>
+        <div class="demo-note" id="d-note"></div>
+      </div>
     </div>
   </div></div>
   <div class="ribbon rv" title="Mongolia's yearly temperature, 1981-2025">__RIBBON__</div>
@@ -511,8 +573,8 @@ PAGE = r"""<!doctype html>
   <div class="center">
     <span class="kicker rv">Example use cases</span>
     <h2 class="rv" style="--d:80">Six guided missions</h2>
-    <p class="lead rv" style="--d:160; margin-top:18px;">Each mission sets up the app, asks a question and lets students guess before they see the evidence.
-      Teachers can share any of them with a single link.</p>
+    <p class="lead rv" style="--d:160; margin-top:18px;">Click a mission: it loads the live demo at the top of this page, asks a question and lets you guess before you see the evidence.
+      Every mission has its own link teachers can share (add <b>#mission-3</b> to this page's address).</p>
   </div>
   <div class="missions">__MISSIONS__</div>
 </div></section>
@@ -548,7 +610,7 @@ PAGE = r"""<!doctype html>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 const FIGS = __FIGS__, FACTS = __FACTS__, SCANS = __SCANS__, STRIPES = __STRIPES_JSON__, USERS = __USERS_JSON__;
-const DEMO = __DEMO_JSON__;
+const DEMO = __DEMO_JSON__, MISSIONS = __MISSIONS_JSON__, MISSION_TITLES = __MISSION_TITLES__;
 const CONFIG = {displaylogo:false, responsive:true, modeBarButtonsToRemove:['lasso2d','select2d','toImage']};
 const tip = document.getElementById('tip');
 
@@ -637,8 +699,56 @@ function renderDemo() {
       yaxis: {title: {text: v.unit === 'fraction' ? 'fraction (0-1)' : v.unit, font: {size: 11}}, gridcolor: 'rgba(29,20,22,0.07)', zeroline: false}},
     {displayModeBar: false, responsive: true});
 }
-dLoc.onchange = () => { fillVars(); renderDemo(); }; dVar.onchange = renderDemo; dSea.onchange = renderDemo;
+function setDemo(loc, v, sea) {
+  dLoc.value = loc; fillVars(); dVar.value = v; if (!dSea.disabled) dSea.value = sea; renderDemo();
+}
+// ---------- missions in the live demo (guess first, then the evidence) ----------
+const dmBox = document.getElementById('d-mission'), dmGuess = document.getElementById('dm-guess'), dmFb = document.getElementById('dm-fb');
+const dmChips = document.getElementById('dm-chips'), dEv = document.getElementById('d-evidence');
+let activeMission = null;
+function exitMission() {
+  activeMission = null; dmBox.hidden = true; dEv.classList.remove('veiled');
+  if (location.hash.startsWith('#mission-')) history.replaceState(null, '', location.pathname + location.search);
+}
+function startMission(n, scroll = true) {
+  const m = MISSIONS[n - 1]; if (!m) return;
+  activeMission = n; dmBox.hidden = false;
+  document.getElementById('dm-label').textContent = `Mission ${n} · ${MISSION_TITLES[n - 1]}`;
+  document.getElementById('dm-q').textContent = m.q;
+  document.getElementById('dm-hint').textContent = m.hint;
+  dmGuess.classList.remove('done'); dmGuess.querySelectorAll('button').forEach(b => b.classList.remove('on'));
+  dmFb.textContent = 'Make your guess to reveal the evidence.'; dmChips.innerHTML = '';
+  setDemo(m.loc, m.var, m.sea); dEv.classList.add('veiled');
+  history.replaceState(null, '', `#mission-${n}`);
+  if (scroll) frame.scrollIntoView({behavior: 'smooth', block: 'start'});
+}
+dmGuess.querySelectorAll('button').forEach(b => b.onclick = () => {
+  if (!activeMission || dmGuess.classList.contains('done')) return;
+  const m = MISSIONS[activeMission - 1], sr = DM.series[`${m.loc}|${m.var}|${m.sea}`];
+  const truth = sr.vd === 's' ? (sr.s > 0 ? 'up' : 'down') : 'none', g = b.dataset.g;
+  const words = {up: 'going up', down: 'going down', none: 'no real trend'};
+  b.classList.add('on'); dmGuess.classList.add('done'); dEv.classList.remove('veiled');
+  if (g === truth) dmFb.innerHTML = `🎯 <b>Good detective work!</b> You said <i>${words[g]}</i> and the evidence agrees.`;
+  else if (sr.vd === 'm' && g !== 'none' && g === (sr.s > 0 ? 'up' : 'down'))
+    dmFb.innerHTML = `🤏 <b>Close!</b> The data does lean that way, but the two tests disagree, so it is not proven yet.`;
+  else dmFb.innerHTML = `🤔 <b>Not quite.</b> You said <i>${words[g]}</i>, but the evidence says <i>${words[truth]}</i>. Look at the numbers and the chart to see why.`;
+  dmChips.innerHTML = m.chips.map((c, i) => `<button type="button" data-i="${i}">${c.label}</button>`).join('');
+  dmChips.querySelectorAll('button').forEach(cb => cb.onclick = () => {
+    const c = m.chips[+cb.dataset.i]; setDemo(c.loc, c.var, c.sea);
+    dmChips.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === cb));
+  });
+});
+document.getElementById('dm-exit').onclick = exitMission;
+dLoc.onchange = () => { exitMission(); fillVars(); renderDemo(); };
+dVar.onchange = () => { exitMission(); renderDemo(); };
+dSea.onchange = () => { exitMission(); renderDemo(); };
 dLoc.value = 'MNG'; fillVars(); dVar.value = 'T2M'; renderDemo();
+document.querySelectorAll('[data-mission]').forEach(el => {
+  el.onclick = e => { if (e.target.closest('a')) return; startMission(+el.dataset.mission); };
+  el.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startMission(+el.dataset.mission); } };
+});
+const hashMission = (location.hash.match(/^#mission-(\d)$/) || [])[1];
+if (hashMission) setTimeout(() => startMission(+hashMission), 300);
 
 // count-up numbers when they scroll into view
 function countUp(el) {
@@ -655,12 +765,13 @@ document.querySelectorAll('[data-count]').forEach(el => cObs.observe(el));
 function showUser(id) {
   const u = USERS.find(x => x.id === id);
   document.querySelectorAll('.ubtn').forEach(b => b.classList.toggle('on', b.dataset.u === id));
-  const link = u.link ? `<a class="btn btn-primary btn-sm" style="margin-top:22px" href="${u.link}">Try their mission <span class="arr">→</span></a>` :
-    `<p class="muted" style="margin-top:22px; font-size:14px;">Their mission: #${u.mission} (opens in the app once it is online).</p>`;
+  const link = `<button type="button" class="btn btn-primary btn-sm" style="margin-top:22px" data-mission="${u.mission}">Try their mission: ${MISSION_TITLES[u.mission - 1]} <span class="arr">↑</span></button>`
+    + (u.link ? ` <a class="muted" style="font-size:14px; margin-left:10px;" href="${u.link}">or open it in the full app ↗</a>` : '');
   document.getElementById('upanel').innerHTML = `<div class="fade"><div class="big">${u.icon}</div>
     <p class="muted" style="margin-top:14px; font-size:14px; text-transform:uppercase; letter-spacing:.12em; font-weight:700;">${u.name} · ${u.who}</p>
     <blockquote>“${u.q}”</blockquote><p class="muted">How they use Trend Detective:</p>
     <ol>${u.how.map(h => `<li>${h}</li>`).join('')}</ol>${u.note ? `<div class="note">${u.note}</div>` : ''}${link}</div>`;
+  document.querySelector('#upanel [data-mission]').onclick = e => startMission(+e.currentTarget.dataset.mission);
 }
 document.querySelectorAll('.ubtn').forEach(b => b.onclick = () => showUser(b.dataset.u));
 showUser(USERS[0].id);
@@ -744,6 +855,7 @@ def main() -> None:
             f.update_layout(height=460)
         return site_style(f, font_size=12 if font_size <= 16 else 13)
     figs, facts, scans, stripes = build_data(style=style)
+    demo = build_demo()
     t, s, c = facts["t2m"], facts["seasons"], facts["compare"]
     facts["seasons_caption"] = (f"<b>Temperature trend by season:</b> summers warm significantly at {s['summer_sig']} of {s['n']} sites; "
                                 f"winters lean colder (average {s['winter_avg']:+.2f} °C per decade), significant at {'none' if s['winter_sig'] == 0 else s['winter_sig']} of the {s['n']}. Faded bars are not significant.")
@@ -772,10 +884,16 @@ def main() -> None:
     steps = "".join(f'<div class="step"><div class="no">STEP {i + 1}</div><h3>{html.escape(st["t"])}</h3><p>{html.escape(st["d"])}</p></div>' for i, st in enumerate(STEPS))
     shots = "".join(f'<img src="img/{st["img"]}" alt="{html.escape(st["t"])}">' for st in STEPS)
     missions = "".join(
-        (f'<a class="mcard rv" style="--d:{(i % 3) * 100}" href="{app}/?mission={i + 1}">' if app else f'<div class="mcard rv" style="--d:{(i % 3) * 100}">')
+        f'<div class="mcard rv" role="button" tabindex="0" data-mission="{i + 1}" style="--d:{(i % 3) * 100}">'
         + f'<div class="no">MISSION {i + 1}</div><h3>{html.escape(title)}</h3><p>{html.escape(desc)}</p>'
-        + (f'<div class="go">Open in the app →</div></a>' if app else '<div class="go muted">Opens in the app once it is online</div></div>')
+        + '<div class="go">Try it in the live demo ↑</div>'
+        + (f'<a class="go2" href="{html.escape(app)}/?mission={i + 1}">or open it in the full app ↗</a>' if app else '')
+        + '</div>'
         for i, (title, desc) in enumerate(MISSIONS))
+    for cfg in MISSION_CFG:  # every mission view must exist in the demo data
+        for view in [cfg] + cfg["chips"]:
+            key = f'{view["loc"]}|{view["var"]}|{view["sea"]}'
+            assert key in demo["series"], f"missing demo series {key}"
     if app:
         nav_cta = f'<a class="btn btn-primary btn-sm" href="{html.escape(app)}">Open the app <span class="arr">→</span></a>'
         hero_cta = f'<a class="btn btn-primary" href="{html.escape(app)}">Open the app <span class="arr">→</span></a><a class="btn btn-ghost" href="#explore">Explore the evidence ↓</a>'
@@ -791,7 +909,9 @@ def main() -> None:
         "__SCANS__": json.dumps(scans, separators=(",", ":"), ensure_ascii=False),
         "__STRIPES_JSON__": json.dumps(stripes, separators=(",", ":")),
         "__USERS_JSON__": json.dumps(users, ensure_ascii=False),
-        "__DEMO_JSON__": json.dumps(build_demo(), separators=(",", ":"), ensure_ascii=False),
+        "__DEMO_JSON__": json.dumps(demo, separators=(",", ":"), ensure_ascii=False),
+        "__MISSIONS_JSON__": json.dumps(MISSION_CFG, ensure_ascii=False),
+        "__MISSION_TITLES__": json.dumps([t for t, _ in MISSIONS], ensure_ascii=False),
         "__DEMO_CTA__": (f'<a href="{html.escape(app)}">Open the full app ↗</a><br>' if app else "")
                         + "The full app adds the clickable map, year-by-year animation, scanner, compare mode and guided missions.",
         "__RIBBON__": stripes_html, "__TL_STRIPES__": stripes_html, "__TL_YEARS__": tl_years, "__PINS__": pins,

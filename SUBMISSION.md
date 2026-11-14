@@ -2,7 +2,7 @@
 
 The sections below match the boxes on the Space Apps project page, in the same order
 (from the official Project Submission Guide). All numbers come from the app (NASA POWER, 1981-2025).
-Before submitting, replace the ⟨live app link⟩ placeholder once the app is deployed.
+When the Streamlit app is deployed, add a "Live app: <link>" line under Link to Final Project.
 
 ---
 
@@ -38,9 +38,8 @@ https://sigmabishrelxx.github.io/earth-system-trend-detective/
 
 (Project website with a live mini version of the app at the top (choose a place, variable and season and get the
 same numbers and verdict as the app), interactive charts from the app's NASA data, who it is for, how it works,
-findings and example missions. It links to the live app and the code.)
+findings and six guided missions you can try in the live demo. It links to the 7-slide demo and the code.)
 
-Live app: ⟨live app link⟩
 Code: https://github.com/SigmabishrelXx/earth-system-trend-detective
 
 ## Detailed Project Description
@@ -76,7 +75,8 @@ Ulaanbaatar*, *Svalbard vs Ulaanbaatar winters: test a debated idea*, *Taiga vs 
 and *Are Gobi winds slowing down?*
 Before the evidence appears, students make a guess ("going up", "going down" or "no real trend") and get feedback,
 so they practise reading evidence instead of being told results.
-Teachers can share a mission directly by adding `?mission=1` to `?mission=6` to the app link.
+Every mission also runs in the live demo on the project website, and each has its own shareable link (for example
+…/#mission-3).
 
 **What I found (NASA POWER, 1981-2025).**
 - **Mongolia is warming.** The country-average air temperature rose **+0.18 °C per decade** (t-test p = 0.009,

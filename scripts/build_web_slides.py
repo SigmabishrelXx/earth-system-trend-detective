@@ -440,7 +440,7 @@ PAGE = r"""<!doctype html>
       <h3 style="font-size:40px;">Try it</h3>
       __APP_CTA__
       <p style="font-size:25px; margin-top:16px;"><span class="muted">Code:</span><br><a href="__REPO__">github.com/SigmabishrelXx/earth-system-trend-detective</a></p>
-      <p style="font-size:22px; margin-top:16px;" class="muted">Teachers can share a ready-made mission: add <b style="color:var(--text)">?mission=3</b> to the app link. Open source, MIT License.</p>
+      <p style="font-size:22px; margin-top:16px;" class="muted">Every mission runs in the live demo and has its own link teachers can share. Open source, MIT License.</p>
     </div>
   </div>
   <p class="abs muted" data-a="fade" style="--d:900; left:104px; right:104px; bottom:84px; font-size:19px; line-height:1.45;">
@@ -617,7 +617,7 @@ def main() -> None:
         url = html.escape(args.app_url)
         app_link, app_cta = f'<a href="{url}">Open the live app ↗</a>', f'<a class="cta" href="{url}">Open the live app ↗</a>'
     else:
-        app_link, app_cta = "", '<p class="muted" style="font-size:25px;">Live app link: see the project page.</p>'
+        app_link, app_cta = "", '<a class="cta" href="https://sigmabishrelxx.github.io/earth-system-trend-detective/">Try the live demo ↗</a>'
 
     reps = {
         "__FIGS__": json.dumps(figs, separators=(",", ":")),
