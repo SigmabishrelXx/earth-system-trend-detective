@@ -209,3 +209,16 @@ def slide_style(fig: go.Figure, height: int | None = None, font_size: int = 16) 
     if height:
         fig.update_layout(height=height)
     return fig
+
+
+def site_style(fig: go.Figure, height: int | None = None, font_size: int = 14) -> go.Figure:
+    """Light, transparent styling for figures on the scrolling project website."""
+    fig.update_layout(template="plotly_white", paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+                      font=dict(family="Inter, -apple-system, 'Helvetica Neue', Arial, sans-serif", color="#0f172a",
+                                size=font_size),
+                      hoverlabel=dict(font_size=font_size))
+    fig.update_xaxes(gridcolor="rgba(15,23,42,0.08)")
+    fig.update_yaxes(gridcolor="rgba(15,23,42,0.08)")
+    if height:
+        fig.update_layout(height=height)
+    return fig

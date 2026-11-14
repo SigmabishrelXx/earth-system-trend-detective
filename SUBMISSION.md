@@ -2,7 +2,7 @@
 
 The sections below match the boxes on the Space Apps project page, in the same order
 (from the official Project Submission Guide). All numbers come from the app (NASA POWER, 1981-2025).
-Before submitting, replace the one ⟨live app link⟩ placeholder once the app is deployed.
+Before submitting, replace the ⟨live app link⟩ placeholder once the app is deployed.
 
 ---
 
@@ -25,7 +25,7 @@ decade (significant), with significant warming across 62% of the country, and su
 
 ## Link to Project Demo
 
-https://sigmabishrelxx.github.io/earth-system-trend-detective/
+https://sigmabishrelxx.github.io/earth-system-trend-detective/slides/
 
 (Interactive 7-slide web presentation with live charts, publicly viewable without login. Use the arrow keys or the
 buttons to move. A PDF version is linked at the top of the page and is also at
@@ -33,8 +33,12 @@ https://github.com/SigmabishrelXx/earth-system-trend-detective/blob/main/demo/Ea
 
 ## Link to Final Project
 
-⟨live app link⟩
+https://sigmabishrelxx.github.io/earth-system-trend-detective/
 
+(Project website with live, interactive charts from the app's NASA data, who it is for, how it works, findings and
+example missions. It links to the live app and the code.)
+
+Live app: ⟨live app link⟩
 Code: https://github.com/SigmabishrelXx/earth-system-trend-detective
 
 ## Detailed Project Description
@@ -115,8 +119,8 @@ focus, and built a first working version of the app. I then used **Claude Code**
 review that version and to write most of the new code: the Mann-Kendall test, confidence intervals and Sen's slope,
 the data loading and bundled NASA snapshot, the Mongolia map and country average, seasons, compare mode and the
 guided missions, the clickable map, the year-by-year animation and the guessing game. It also wrote the unit tests
-and README, built the interactive web slides and the PDF slides from the app's real charts and screenshots, and
-helped draft this text. I checked the app and its results and am responsible for the final project.
+and README, built the project website, the interactive web slides and the PDF slides from the app's real charts and
+screenshots, and helped draft this text. I checked the app and its results and am responsible for the final project.
 
 Where SI was used is marked in the project itself: a note at the top of each code file, a "Use of AI" section in
 the README, an AI co-author line on every code commit, and a footer on the last demo slide. All data and every number

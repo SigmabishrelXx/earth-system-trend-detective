@@ -56,7 +56,7 @@ def verdict_icon(r) -> str:
     return {"significant": "✅", "mixed": "⚠️", "not significant": "➖"}[r.verdict]
 
 
-def build_data():
+def build_data(style=slide_style):
     grid = load_grid()
     boundary = load_boundary()
     figs, facts = {}, {}
@@ -91,7 +91,7 @@ def build_data():
             if trace.name == "cells":
                 trace.hovertemplate = trace.hovertemplate.replace("<extra>Click to explore</extra>", "<extra></extra>")
         f.update_layout(margin=dict(l=0, r=0, t=36, b=0))
-        figs[f"map_{var}"] = slide_style(f, font_size=16)
+        figs[f"map_{var}"] = style(f, font_size=16)
         if var == "T2M":
             facts["t2m"] = {"rate": r.per_decade, "p": r.mk.p, "total": r.total_change,
                             "warm": area_share(tr, sig & (tr["PerDecade"] > 0)),
@@ -103,7 +103,7 @@ def build_data():
     anim.layout.sliders = ()
     anim.layout.updatemenus = ()
     anim.update_layout(showlegend=False, margin=dict(l=0, r=0, t=56, b=0))
-    figs["anim"] = slide_style(anim, font_size=18)
+    figs["anim"] = style(anim, font_size=18)
 
     # Slide 4: scanner tables for the Mongolian sites; slide 6: seasons chart
     scans, seasons_rows = {}, []
@@ -127,7 +127,7 @@ def build_data():
             r = analyze(seasonal_series(monthly, "T2M", season))
             seasons_rows.append((site.split(" (")[0], season.split(" ")[0].lower(), r.per_decade, r.verdict == "significant"))
     sdf = pd.DataFrame(seasons_rows, columns=["Site", "Season", "PerDecade", "Significant"])
-    figs["seasons"] = slide_style(seasons_figure(sdf, height=540), font_size=18)
+    figs["seasons"] = style(seasons_figure(sdf, height=540), font_size=18)
     summer, winter = sdf[sdf["Season"] == "summer"], sdf[sdf["Season"] == "winter"]
     facts["seasons"] = {"summer_sig": int(summer["Significant"].sum()), "n": len(summer),
                         "winter_sig": int(winter["Significant"].sum()), "winter_avg": float(winter["PerDecade"].mean())}
@@ -141,7 +141,7 @@ def build_data():
     b, rb = winter_series("Arctic (Svalbard, Norway)")
     cf = compare_figure(a, ra, "Ulaanbaatar", b, rb, "Svalbard (Arctic)", "T2M", height=540)
     cf.update_layout(title=None, margin=dict(l=10, r=10, t=40, b=10))
-    figs["compare"] = slide_style(cf, font_size=18)
+    figs["compare"] = style(cf, font_size=18)
     facts["compare"] = {"ub": ra.per_decade, "ub_verdict": ra.verdict, "arctic": rb.per_decade, "arctic_p": rb.mk.p}
     return {k: fig_json(v) for k, v in figs.items()}, facts, scans, stripes
 
@@ -154,9 +154,10 @@ PAGE = r"""<!doctype html>
 <title>Earth System Trend Detective · Team Florensiza · NASA Space Apps 2026</title>
 <meta name="description" content="Interactive 7-slide demo for the NASA Space Apps Challenge 2026 challenge Be An Earth System Trend Detective! by Team Florensiza (Bishrel), Ulaanbaatar. Made with help from Claude Code (AI).">
 <meta name="author" content="Bishrel (Team Florensiza)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%94%8E%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="plotly.min.js"></script>
+<script src="../plotly.min.js"></script>
 <style>
   :root { --bg:#0b0f17; --panel:rgba(18,24,38,.82); --line:#243045; --text:#e8edf5; --muted:#93a1b8; --hot:#ff6b4a; --cool:#4d9fff;
           --teal:#2dd4bf; --gold:#fbbf24; --ease:cubic-bezier(.65,0,.35,1); --out:cubic-bezier(.16,1,.3,1);
@@ -335,7 +336,7 @@ PAGE = r"""<!doctype html>
       <div class="step" data-a="up" style="--d:950"><div class="num">4</div><div><b>Is it real?</b><span>t-test + 95% confidence interval, Mann-Kendall test, Sen's slope. "Significant" only when both agree.</span></div></div>
     </div>
     <div data-a="reveal3d" style="--d:250">
-      <img src="img/app.png" class="shot" alt="The Earth System Trend Detective app">
+      <img src="../img/app.png" class="shot" alt="The Earth System Trend Detective app">
       <div class="caption">The real app: missions ask students to guess first, then show the evidence. __APP_LINK__</div>
     </div>
   </div>
@@ -619,13 +620,13 @@ def main() -> None:
     left = set(re.findall(r"__[A-Z0-9_]+__", page))
     assert not left, f"unfilled placeholders: {left}"
 
-    DOCS.mkdir(exist_ok=True)
+    (DOCS / "slides").mkdir(parents=True, exist_ok=True)
     (DOCS / "img").mkdir(exist_ok=True)
-    (DOCS / "index.html").write_text(page)
+    (DOCS / "slides" / "index.html").write_text(page)
     (DOCS / ".nojekyll").write_text("")
     shutil.copy(ROOT / "demo" / "img" / "app.png", DOCS / "img" / "app.png")
     shutil.copy(Path(plotly.__file__).parent / "package_data" / "plotly.min.js", DOCS / "plotly.min.js")
-    print(f"wrote docs/index.html ({(DOCS / 'index.html').stat().st_size / 1e6:.2f} MB)")
+    print(f"wrote docs/slides/index.html ({(DOCS / 'slides' / 'index.html').stat().st_size / 1e6:.2f} MB)")
 
 
 if __name__ == "__main__":

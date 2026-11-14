@@ -9,7 +9,8 @@ and find out **what is changing, where it is changing, how much it is changing, 
 statistically significant.**
 
 **Live app:** _add your Streamlit Community Cloud link here after deploying_
-**Interactive demo slides (7):** https://sigmabishrelxx.github.io/earth-system-trend-detective/ (cinematic, live charts; storyboard: [demo/STORYBOARD.md](demo/STORYBOARD.md); PDF version: [demo/Earth_System_Trend_Detective_slides.pdf](demo/Earth_System_Trend_Detective_slides.pdf))
+**Project website:** https://sigmabishrelxx.github.io/earth-system-trend-detective/ (scroll-through showcase with live charts)
+**Interactive demo slides (7):** https://sigmabishrelxx.github.io/earth-system-trend-detective/slides/ (cinematic, live charts; storyboard: [demo/STORYBOARD.md](demo/STORYBOARD.md); PDF version: [demo/Earth_System_Trend_Detective_slides.pdf](demo/Earth_System_Trend_Detective_slides.pdf))
 
 ---
 
@@ -91,8 +92,9 @@ scripts/build_bundled_data.py  Downloads the bundled NASA POWER snapshot
 tests/test_analysis.py         Unit tests
 demo/                          Demo slides (slides.html -> PDF), screenshots of the real app
 scripts/build_slides.py        Renders the slides PDF with headless Chrome
-scripts/build_web_slides.py    Builds the interactive web slides in docs/ (GitHub Pages)
-docs/                          Interactive web slides (index.html + Plotly.js), served by GitHub Pages
+scripts/build_site.py          Builds the scrolling project website (docs/index.html)
+scripts/build_web_slides.py    Builds the interactive 7-slide deck (docs/slides/)
+docs/                          Website + slides + Plotly.js, served by GitHub Pages
 .streamlit/config.toml         Dark theme for the app
 scripts/capture_screenshots.py Captures the app screenshots used in the slides
 data/bundled/                  NASA POWER snapshot + Mongolia border
