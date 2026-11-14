@@ -146,12 +146,12 @@ PAGE = r"""<!doctype html>
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%94%8E%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="plotly.min.js" defer></script>
 <style>
   :root { --bg:#f2efe7; --tint:#fbe8ec; --card:rgba(255,255,255,.74); --ink:#1d1416; --muted:#6e6264; --line:#eadcdc; --navy:#24191b; --navy2:#3a2a2d;
           --hot:#dc143c; --hot2:#e8475f; --cool:#2563eb; --teal:#0f8a7d; --ease:cubic-bezier(.16,1,.3,1);
-          --display:"Archivo","Helvetica Neue",Arial,sans-serif; --body:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif; }
+          --display:"Manrope","Helvetica Neue",Arial,sans-serif; --body:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif; }
   * { box-sizing:border-box; margin:0; padding:0; }
   html { scroll-behavior:smooth; scroll-padding-top:84px; }
   html { background:var(--bg); }
@@ -160,9 +160,9 @@ PAGE = r"""<!doctype html>
   .wrap { max-width:1200px; margin:0 auto; padding:0 28px; }
   section { padding:110px 0; position:relative; }
   h1, h2, h3 { font-family:var(--display); letter-spacing:-.01em; line-height:1.05; }
-  h1 { font-size:clamp(44px, 6.6vw, 92px); font-weight:850; font-stretch:105%; }
-  h2 { font-size:clamp(34px, 4.4vw, 58px); font-weight:820; font-stretch:105%; }
-  h3 { font-size:24px; font-weight:750; }
+  h1 { font-size:clamp(36px, 4.6vw, 62px); font-weight:700; letter-spacing:-0.025em; line-height:1.08; }
+  h2 { font-size:clamp(28px, 3.1vw, 42px); font-weight:700; letter-spacing:-0.02em; line-height:1.12; }
+  h3 { font-size:21px; font-weight:700; letter-spacing:-0.01em; }
   .hl { color:var(--hot); }
   .kicker { display:inline-block; font-size:13px; letter-spacing:.22em; text-transform:uppercase; font-weight:700; color:var(--hot); margin-bottom:16px; }
   .lead { font-size:clamp(18px, 1.6vw, 21px); color:var(--muted); max-width:760px; }
@@ -173,7 +173,7 @@ PAGE = r"""<!doctype html>
   header { position:fixed; top:0; left:0; right:0; z-index:50; transition:background .3s, box-shadow .3s, backdrop-filter .3s; }
   header.scrolled { background:rgba(242,239,231,.86); backdrop-filter:blur(14px); box-shadow:0 1px 0 var(--line); }
   .nav { display:flex; align-items:center; gap:28px; height:72px; }
-  .logo { font-family:var(--display); font-stretch:125%; font-weight:900; font-size:15px; line-height:1; text-transform:uppercase; text-decoration:none; letter-spacing:.01em; }
+  .logo { font-family:var(--display); font-weight:800; font-size:15px; line-height:1; text-transform:uppercase; text-decoration:none; letter-spacing:.01em; }
   .logo span { color:var(--hot); }
   .nav nav { display:flex; gap:24px; margin-left:auto; }
   .nav nav a { text-decoration:none; font-size:15px; font-weight:500; color:var(--ink); opacity:.78; transition:opacity .2s; position:relative; }
@@ -201,7 +201,7 @@ PAGE = r"""<!doctype html>
   .demo { display:grid; grid-template-columns:330px 1fr; text-align:left; background:#fff; color:var(--ink); border-radius:20px; overflow:hidden;
           box-shadow:0 40px 100px rgba(120,20,40,.14), 0 0 0 1px rgba(29,20,22,.07); transform-origin:center top; will-change:transform; }
   .demo-side { background:#fbf6f4; padding:26px 22px; border-right:1px solid var(--line); display:flex; flex-direction:column; }
-  .demo-brand { font-family:var(--display); font-weight:850; font-size:17px; margin-bottom:22px; }
+  .demo-brand { font-family:var(--display); font-weight:800; font-size:17px; margin-bottom:22px; }
   .demo-brand span { font-family:var(--body); font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--hot);
                      border:1px solid rgba(220,20,60,.35); border-radius:999px; padding:3px 8px; margin-top:8px; display:table; white-space:nowrap; }
   .demo-side label { display:block; font-size:13px; color:var(--muted); margin-bottom:14px; font-weight:500; }
@@ -249,7 +249,7 @@ PAGE = r"""<!doctype html>
   .why .lead { color:var(--muted); }
   .stats { display:grid; grid-template-columns:repeat(4, 1fr); gap:22px; margin-top:54px; }
   .stat { border-top:2px solid rgba(220,20,60,.18); padding-top:22px; }
-  .stat .n { font-family:var(--display); font-stretch:115%; font-weight:900; font-size:clamp(40px, 4vw, 58px); line-height:1; color:var(--ink); }
+  .stat .n { font-family:var(--display); font-weight:800; font-size:clamp(30px, 2.9vw, 42px); white-space:nowrap; line-height:1; color:var(--ink); }
   .stat .n.hot { color:var(--hot); }
   .stat .l { margin-top:10px; font-size:17px; color:var(--ink); }
   .stat .s { margin-top:12px; font-size:12px; color:var(--muted); } .stat .s a { color:var(--muted); }
@@ -264,7 +264,7 @@ PAGE = r"""<!doctype html>
   .ubtn.on { border-color:var(--hot); box-shadow:0 10px 30px rgba(232,85,47,.12); }
   .upanel { background:#fff; border:1px solid var(--line); border-radius:24px; padding:38px; min-height:420px; position:relative; overflow:hidden; }
   .upanel .big { font-size:64px; line-height:1; }
-  .upanel blockquote { font-family:var(--display); font-stretch:105%; font-size:clamp(24px, 2.4vw, 34px); font-weight:780; margin:18px 0 6px; line-height:1.15; }
+  .upanel blockquote { font-family:var(--display); font-size:clamp(24px, 2.4vw, 34px); font-weight:700; margin:18px 0 6px; line-height:1.15; }
   .upanel ol { margin:22px 0 0 0; list-style:none; counter-reset:s; }
   .upanel ol li { counter-increment:s; padding-left:46px; position:relative; margin-bottom:14px; font-size:17px; }
   .upanel ol li::before { content:counter(s); position:absolute; left:0; top:-2px; width:30px; height:30px; border-radius:50%; background:var(--navy); color:#fff;
@@ -277,7 +277,7 @@ PAGE = r"""<!doctype html>
   .how { display:grid; grid-template-columns:1fr 1.15fr; gap:60px; margin-top:40px; }
   .steps .step { min-height:70vh; display:flex; flex-direction:column; justify-content:center; padding:20px 0; opacity:.35; transition:opacity .4s; }
   .steps .step.on { opacity:1; }
-  .steps .step .no { font-family:var(--display); font-weight:900; font-size:15px; color:var(--hot); letter-spacing:.14em; margin-bottom:12px; }
+  .steps .step .no { font-family:var(--display); font-weight:800; font-size:15px; color:var(--hot); letter-spacing:.14em; margin-bottom:12px; }
   .steps .step h3 { font-size:clamp(26px, 2.6vw, 36px); }
   .steps .step p { color:var(--muted); font-size:18px; margin-top:14px; max-width:460px; }
   .sticky { position:sticky; top:110px; height:calc(100vh - 160px); display:flex; align-items:center; }
@@ -309,16 +309,16 @@ PAGE = r"""<!doctype html>
   .tl .bar i { flex:1; transition:transform .25s; } .tl .bar i:hover { transform:scaleY(1.06); }
   .tl .yrs { position:relative; height:28px; margin-top:8px; } .tl .yrs span { position:absolute; transform:translateX(-50%); font-size:13px; color:var(--muted); }
   .tl .pins { position:relative; height:70px; } .tl .pin { position:absolute; bottom:0; transform:translateX(-50%); text-align:center; opacity:0; transition:opacity .6s; }
-  .tl .pin .t { font-size:13px; color:var(--muted); white-space:nowrap; } .tl .pin .v { font-family:var(--display); font-weight:850; font-size:20px; }
+  .tl .pin .t { font-size:13px; color:var(--muted); white-space:nowrap; } .tl .pin .v { font-family:var(--display); font-weight:800; font-size:20px; }
   .tl .pin .stem { width:2px; height:16px; background:var(--ink); opacity:.5; margin:4px auto 0; }
   .tl .pin .v, .tl .pin .t { white-space:nowrap; }
   .tl .pin:last-child { transform:translateX(-82%); text-align:right; } .tl .pin:last-child .stem { margin-right:16%; }
   .tl .pin:first-child { transform:translateX(-20%); text-align:left; } .tl .pin:first-child .stem { margin-left:18%; }
   .tl .scanline { position:absolute; top:70px; height:180px; width:3px; background:#fff; box-shadow:0 0 16px 3px rgba(255,255,255,.9); opacity:0; pointer-events:none; }
-  .tl .readout { position:absolute; top:28px; transform:translateX(-50%); font-family:var(--display); font-weight:850; font-size:22px; opacity:0; pointer-events:none; white-space:nowrap; }
+  .tl .readout { position:absolute; top:28px; transform:translateX(-50%); font-family:var(--display); font-weight:800; font-size:22px; opacity:0; pointer-events:none; white-space:nowrap; }
   .tip { position:fixed; z-index:60; pointer-events:none; background:#24191b; color:#fff; padding:6px 12px; border-radius:9px; font-size:14px; opacity:0; transition:opacity .15s; }
   .bigstats { display:grid; grid-template-columns:repeat(3, 1fr); gap:22px; margin-top:44px; }
-  .bigstats .card .n { font-family:var(--display); font-stretch:112%; font-weight:900; font-size:clamp(36px, 3.7vw, 54px); line-height:1; white-space:nowrap; }
+  .bigstats .card .n { font-family:var(--display); font-weight:800; font-size:clamp(32px, 3.2vw, 46px); line-height:1; white-space:nowrap; }
   .twist { display:grid; grid-template-columns:0.8fr 1.4fr; gap:36px; margin-top:80px; align-items:start; }
   .twist p { font-size:19px; margin-bottom:16px; }
 
@@ -326,7 +326,7 @@ PAGE = r"""<!doctype html>
   .missions { display:grid; grid-template-columns:repeat(3, 1fr); gap:18px; margin-top:44px; }
   .mcard { background:#fff; border:1px solid var(--line); border-radius:20px; padding:24px; text-decoration:none; display:block; transition:all .25s var(--ease); }
   .mcard:hover { transform:translateY(-4px); box-shadow:0 20px 50px rgba(110,25,40,.12); border-color:#dfc5c8; }
-  .mcard .no { font-family:var(--display); font-weight:900; color:var(--hot); font-size:14px; letter-spacing:.12em; }
+  .mcard .no { font-family:var(--display); font-weight:800; color:var(--hot); font-size:14px; letter-spacing:.12em; }
   .mcard h3 { margin-top:10px; font-size:21px; } .mcard p { color:var(--muted); font-size:15px; margin-top:8px; }
   .mcard .go { margin-top:16px; font-size:14px; font-weight:650; color:var(--navy2); }
 
@@ -493,7 +493,7 @@ PAGE = r"""<!doctype html>
   <div class="twist">
     <div>
       <span class="kicker rv">The twist</span>
-      <h2 class="rv" style="--d:80; font-size:clamp(30px,3.4vw,44px);">…but not evenly</h2>
+      <h2 class="rv" style="--d:80; font-size:clamp(26px,2.6vw,34px);">…but not evenly</h2>
       <p class="rv" style="--d:160; margin-top:20px;"><b class="hl">Summers</b> warm significantly at __SUMMER_SIG__ of __NSITES__ Mongolian sites.</p>
       <p class="rv" style="--d:220"><b style="color:var(--cool)">Winters</b> lean colder (__WINTER_AVG__ °C per decade), but not significantly.</p>
       <p class="rv" style="--d:280">Meanwhile <b class="hl">Svalbard winters</b> (one Arctic grid point) warm __ARCTIC__ °C per decade: one variable, opposite directions. Whether they are connected ("warm Arctic, cold continent") is a debated idea to test, not proof.</p>
