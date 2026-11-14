@@ -28,7 +28,8 @@ ROOT = Path(__file__).resolve().parent.parent
 DEMO = ROOT / "demo"
 PDF = DEMO / "Earth_System_Trend_Detective_slides.pdf"
 PORT = 9334
-W, H = 1920, 1080
+W, H = 1920, 1080  # design size in CSS pixels
+PAGE_W_IN, PAGE_H_IN = 13.333, 7.5  # standard 16:9 slide page
 
 
 async def render(source: Path, n_slides: int) -> None:
@@ -63,8 +64,11 @@ async def render(source: Path, n_slides: int) -> None:
             await cmd("Emulation.setDeviceMetricsOverride", width=W, height=H, deviceScaleFactor=1, mobile=False)
             await cmd("Page.navigate", url=source.as_uri())
             await asyncio.sleep(2.5)
-            pdf = await cmd("Page.printToPDF", printBackground=True, preferCSSPageSize=True,
-                            paperWidth=W / 96, paperHeight=H / 96, marginTop=0, marginBottom=0, marginLeft=0, marginRight=0)
+            # Standard 16:9 slide size (13.333 x 7.5 in, like PowerPoint). The 1920 px design is scaled to fit,
+            # so PDF viewers open it at a normal size instead of zoomed in.
+            pdf = await cmd("Page.printToPDF", printBackground=True, preferCSSPageSize=False,
+                            paperWidth=PAGE_W_IN, paperHeight=PAGE_H_IN, scale=PAGE_W_IN * 96 / W,
+                            marginTop=0, marginBottom=0, marginLeft=0, marginRight=0)
             PDF.write_bytes(base64.b64decode(pdf["data"]))
             print(f"wrote {PDF.relative_to(ROOT)} ({PDF.stat().st_size / 1e6:.1f} MB)")
             (DEMO / "preview").mkdir(exist_ok=True)
