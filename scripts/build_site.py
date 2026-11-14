@@ -122,7 +122,7 @@ STEPS = [
     {"t": "Get a verdict, with its uncertainty shown", "d": "A t-test with a 95% confidence interval, the Mann-Kendall test and Sen's slope. The app calls a trend significant only when both tests agree, explains it in plain words, and flags its limits: data-source changes, correlated years and testing many things at once.", "img": "investigate.png"},
 ]
 
-SITE_URL = "https://sigmabishrelxx.github.io/earth-system-trend-detective/"
+SITE_URL = "https://bishreldev.github.io/earth-system-trend-detective/"
 
 UB, GOBI, KHUV, SVAL, STEPPE = (C.slugify(n) for n in ("Ulaanbaatar (capital)", "South Gobi (Dalanzadgad)",
                                                         "Lake Khuvsgul (northern taiga)", "Arctic (Svalbard, Norway)",
@@ -172,8 +172,8 @@ PAGE = r"""<!doctype html>
 <meta name="author" content="Bishrel (Team Florensiza)">
 <meta property="og:title" content="Earth System Trend Detective · NASA Space Apps 2026">
 <meta property="og:description" content="Is Mongolia's climate really changing? Find out what is changing, where, how much, and whether it is significant, with NASA data.">
-<meta property="og:image" content="https://sigmabishrelxx.github.io/earth-system-trend-detective/img/og.png">
-<meta property="og:url" content="https://sigmabishrelxx.github.io/earth-system-trend-detective/">
+<meta property="og:image" content="https://bishreldev.github.io/earth-system-trend-detective/img/og.png">
+<meta property="og:url" content="https://bishreldev.github.io/earth-system-trend-detective/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%94%8E%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

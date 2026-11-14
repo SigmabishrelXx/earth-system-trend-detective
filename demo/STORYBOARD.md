@@ -2,7 +2,7 @@
 
 Design goal: one continuous "motion picture" instead of seven separate pages. A few **persistent elements**
 stay on screen and morph between slides, while each slide's content arrives in staggered layers.
-Built into the web slides (`docs/index.html`, live at https://sigmabishrelxx.github.io/earth-system-trend-detective/).
+Built into the web slides (`docs/index.html`, live at https://bishreldev.github.io/earth-system-trend-detective/).
 A "PowerPoint" note under each slide explains how to get the same effect with Morph/Push if the deck is ever
 rebuilt in PowerPoint.
 

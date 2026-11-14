@@ -36,7 +36,7 @@ from trend_detective.figures import anomaly_animation, compare_figure, map_figur
 
 ROOT = Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
-REPO = "https://github.com/SigmabishrelXx/earth-system-trend-detective"
+REPO = "https://github.com/bishreldev/earth-system-trend-detective"
 PDF_URL = f"{REPO}/blob/main/demo/Earth_System_Trend_Detective_slides.pdf"
 MAP_VARS = ["T2M", "WS2M", "PRECTOTCORR", "GWETROOT", "FROST_DAYS", "SNODP"]
 Y0, Y1 = C.START_YEAR, C.END_YEAR
@@ -172,8 +172,8 @@ PAGE = r"""<!doctype html>
 <meta name="author" content="Bishrel (Team Florensiza)">
 <meta property="og:title" content="Earth System Trend Detective · 7-slide demo">
 <meta property="og:description" content="Is Mongolia's climate really changing? NASA data, honest statistics. NASA Space Apps 2026, Team Florensiza.">
-<meta property="og:image" content="https://sigmabishrelxx.github.io/earth-system-trend-detective/img/og.png">
-<meta property="og:url" content="https://sigmabishrelxx.github.io/earth-system-trend-detective/slides/">
+<meta property="og:image" content="https://bishreldev.github.io/earth-system-trend-detective/img/og.png">
+<meta property="og:url" content="https://bishreldev.github.io/earth-system-trend-detective/slides/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%94%8E%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -439,7 +439,7 @@ PAGE = r"""<!doctype html>
     <div class="card" data-a="side" style="--d:600; padding:38px 42px;">
       <h3 style="font-size:40px;">Try it</h3>
       __APP_CTA__
-      <p style="font-size:25px; margin-top:16px;"><span class="muted">Code:</span><br><a href="__REPO__">github.com/SigmabishrelXx/earth-system-trend-detective</a></p>
+      <p style="font-size:25px; margin-top:16px;"><span class="muted">Code:</span><br><a href="__REPO__">github.com/bishreldev/earth-system-trend-detective</a></p>
       <p style="font-size:22px; margin-top:16px;" class="muted">Every mission runs in the live demo and has its own link teachers can share. Open source, MIT License.</p>
     </div>
   </div>
@@ -617,7 +617,7 @@ def main() -> None:
         url = html.escape(args.app_url)
         app_link, app_cta = f'<a href="{url}">Open the live app ↗</a>', f'<a class="cta" href="{url}">Open the live app ↗</a>'
     else:
-        app_link, app_cta = "", '<a class="cta" href="https://sigmabishrelxx.github.io/earth-system-trend-detective/">Try the live demo ↗</a>'
+        app_link, app_cta = "", '<a class="cta" href="https://bishreldev.github.io/earth-system-trend-detective/">Try the live demo ↗</a>'
 
     reps = {
         "__FIGS__": json.dumps(figs, separators=(",", ":")),

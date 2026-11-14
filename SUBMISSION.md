@@ -26,21 +26,21 @@ are not.
 
 ## Link to Project Demo
 
-https://sigmabishrelxx.github.io/earth-system-trend-detective/slides/
+https://bishreldev.github.io/earth-system-trend-detective/slides/
 
 (Interactive 7-slide web presentation with live charts, publicly viewable without login. Use the arrow keys or the
 buttons to move. A PDF version is linked at the top of the page and is also at
-https://github.com/SigmabishrelXx/earth-system-trend-detective/blob/main/demo/Earth_System_Trend_Detective_slides.pdf)
+https://github.com/bishreldev/earth-system-trend-detective/blob/main/demo/Earth_System_Trend_Detective_slides.pdf)
 
 ## Link to Final Project
 
-https://sigmabishrelxx.github.io/earth-system-trend-detective/
+https://bishreldev.github.io/earth-system-trend-detective/
 
 (Project website with a live mini version of the app at the top (choose a place, variable and season and get the
 same numbers and verdict as the app), interactive charts from the app's NASA data, who it is for, how it works,
 findings and six guided missions you can try in the live demo. It links to the 7-slide demo and the code.)
 
-Code: https://github.com/SigmabishrelXx/earth-system-trend-detective
+Code: https://github.com/bishreldev/earth-system-trend-detective
 
 ## Detailed Project Description
 
